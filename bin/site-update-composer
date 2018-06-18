@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# Update composer dependencies for a project and commit them.
+
+set -ex
+
+echo -e "\033[97;44m[1/5] Check that we are on a valid repository\033[0m"
+git-is-clean
+
+if git has-branch remotes/origin/develop; then
+	BRANCH=develop
+else
+	BRANCH=master
+fi
+
+git has-branch heads/$BRANCH
+
+git checkout $BRANCH
+
+test -f composer.json
+test -f vendor/bin/phpunit
+test -f phpunit.xml
+
+echo -e "\033[97;44m[2/5] Update the repository to the latest change on $BRANCH\033[0m"
+site-up
+
+echo -e "\033[97;44m[3/5] Verify that the tests are currently passing\033[0m"
+vendor/bin/phpunit
+
+echo -e "\033[97;44m[4/5] Update the composer dependencies\033[0m"
+composer update
+
+if git-is-clean; then
+	echo -e "\033[97;44m>> Nothing to update\033[0m"
+	exit 0
+fi
+
+echo -e "\033[97;44m[5/5] Verify the the tests are still passing\033[0m"
+vendor/bin/phpunit
+
+# 7. Commit all changes
+git commit -a -m "Update all Composer dependencies."
+git push origin
+
+echo -e "\033[97;44m>> All composer dependencies were updated\033[0m"

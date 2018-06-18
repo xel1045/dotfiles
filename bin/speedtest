@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "usage: speedtest <url>"
+	exit
+fi
+
+wget -O/dev/null $1

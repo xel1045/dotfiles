@@ -1,0 +1,92 @@
+#!/usr/bin/env php
+<?php
+
+include(__DIR__ .'/../helpers/bin-helpers.php');
+
+if (count($_SERVER['argv']) !== 2) {
+	info('Usage: jenkins-setup <project-identifier>', true);
+	exit(1);
+}
+
+$projectId = $_SERVER['argv'][1];
+
+$jenkinsUrl = rtrim(get_config('jenkins.url'), '/');
+$jenkinsUsername = get_config('jenkins.username');
+$jenkinsKey = get_config('jenkins.key');
+
+if ( ! $jenkinsUrl || ! $jenkinsUsername || ! $jenkinsKey) {
+	info('Error: You need to configure jenkins.url, jenkins.username and jenkins.key first.', true);
+}
+
+function buildCurl($uri)
+{
+	global $jenkinsUrl, $jenkinsUsername, $jenkinsKey;
+
+	$curl = curl_init("$jenkinsUrl/$uri");
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($curl, CURLOPT_USERPWD, $jenkinsUsername .':'. $jenkinsKey);
+
+	return $curl;
+}
+
+function sendCurl($curl)
+{
+	$response = curl_exec($curl);
+
+	if (curl_errno($curl)) {
+		info('cURL Error: '. curl_error($curl), true);
+	}
+
+	$statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+	if ($statusCode >= 400) {
+		info('cURL Status Code: '. $statusCode, true);
+	}
+
+	curl_close($curl);
+
+	return $response;
+}
+
+foreach (['develop', 'master', 'to-development', 'to-qa'] as $suffix) {
+	$templateName = 'template-'. $suffix;
+	$jobName      = $projectId .'-'. $suffix;
+
+	info("Creating job $jobName fomr $templateName.");
+
+	// Get base config
+	info('Fetching template job configuration');
+	$curl = buildCurl('job/template-'. $templateName .'/config.xml');
+	$template = sendCurl($curl);
+
+	// Add remote to the config
+	info('Update job configuration');
+	$dom = new DOMDocument();
+	$dom->loadXML($template);
+	$git = $dom->getElementsByTagName('hudson.plugins.git.UserRemoteConfig')->item(0);
+
+	$newGitUrl = $dom->createElement('url', 'ssh://git@git.exolnet.com/' . $projectId . '.git');
+	$newGit    = $dom->createElement('hudson.plugins.git.UserRemoteConfig');
+
+	$newGit->appendChild($newGitUrl);
+	$git->parentNode->replaceChild($newGit, $git);
+
+	$config = $dom->saveXML();
+
+	// Create project
+	info('Creating job');
+	$curl = buildCurl('createItem?name='. $jobName);
+	curl_setopt($curl, CURLOPT_POST, 1);
+	curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: text/xml']);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $config);
+
+	sendCurl($curl);
+
+	// Enable job
+	info('Enable job');
+	$curl = buildCurl('job/'. $templateName .'/enable');
+	curl_setopt($curl, CURLOPT_POST, 1);
+	sendCurl($curl);
+
+	info('Done'.PHP_EOL);
+}

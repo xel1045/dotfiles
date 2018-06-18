@@ -1,0 +1,109 @@
+#!/usr/bin/ruby
+#
+# Function to manage Git issue with Redmine
+#
+
+require 'optparse'
+require 'i18n'
+
+I18n.enforce_available_locales = false
+
+Version = "0.1"
+
+$verbose  = 0
+$quiet    = false
+$options  = ""
+
+def log(text, options={})
+	level = options[:level] || 0
+	puts text unless $quiet or level > $verbose
+	exit 1 if options[:exit]
+end
+
+def system_or_raise(command)
+	raise "\"#{command}\" failed" unless system command
+end
+
+def git_config_get(key)
+	`git config --get "#{key}"`.strip
+end
+
+optparse = OptionParser.new do |opts|
+	opts.banner = "Usage: git-commit-fix [options] <issue> [<comments>]"
+	opts.separator("")
+
+	opts.on("-a", "--all", "commit all changed files") { $options += " -a" }
+	opts.on("-v", "--verbose", "verbose") { $verbose += 1 }
+	opts.on("-h", "--help",    "show help and exit") { puts opts; exit 1 }
+
+	opts.summary_width = 25
+end
+
+# Get Git config
+$redmine_host = git_config_get('redmine.url')
+$api_key      = git_config_get('redmine.key')
+
+if $redmine_host.empty?
+	log("No Redmine URL configuration found. You need to define your Redmine URL:")
+	log("")
+	log("    git config [--global] --add issue.redmineurl <redmineurl>")
+	exit 1
+end
+
+if $api_key.empty?
+	log("No Redmine API Key configuration found. You need to define your API Key:")
+	log("")
+	log("    git config [--global] --add issue.redmineapikey <redmineapikey>")
+	exit 1
+end
+
+# Parse ARGV
+optparse.parse!
+
+issue_id = ARGV.shift
+log("No issue number provided.", :exit => true) unless issue_id
+
+comments = ARGV.shift
+
+# Get the issue from Redmine
+begin
+	require 'active_resource'
+rescue LoadError
+	log("This script requires activeresource.\nRun 'gem install activeresource' to install it.", :exit => true)
+end
+
+class Issue < ActiveResource::Base
+	self.headers["User-agent"] = "git-issue/#{Version}"
+	self.format = :xml
+end
+
+$redmine_host.gsub!(/^/, "http://") unless $redmine_host.match("^https?://")
+$redmine_host.gsub!(/\/$/, '')
+
+Issue.site = "#{$redmine_host}";
+
+begin
+	# Get all active users that have the Repository module enabled
+	issue = Issue.find(issue_id, :params => {:key => $api_key})
+rescue ActiveResource::ForbiddenAccess
+	log("Request was denied by your Redmine server. Make sure that 'WS for repository management' is enabled in application settings and that you provided the correct API key.")
+rescue => e
+	log("Unable to connect to #{Issue.site}: #{e}", :exit => true)
+end
+
+if issue.nil?
+  log('No issue found with that number.', :exit => true)
+end
+
+# Generate target branch name
+tracker = issue.tracker.name
+subject = issue.subject
+
+log("#{tracker} ##{issue_id}: #{subject}")
+log("- #{comments}") if comments
+
+message = "[Fix ##{issue_id}] #{subject}"
+message << "\n- #{comments}" if comments
+
+# Execute branching
+system_or_raise(%Q[git commit#{$options} -m"#{message}"])

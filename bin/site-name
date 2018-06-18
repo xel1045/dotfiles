@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [ ! -d .git ]; then
+	echo "Could only get/set site name for Git repositories."
+	exit
+fi
+
+if [ $# -eq 1 ]; then
+	git config --add site.name "$1"
+	exit
+fi
+
+# Git
+NAME=$(git config site.name)
+
+if [ "$NAME" != "" ]; then
+	echo "$NAME"
+	exit
+fi
+
+basename -s .git $(git config --get remote.origin.url)

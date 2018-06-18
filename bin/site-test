@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Run a project's tests.
+
+set -e
+
+if [ -f phpunit.xml ]; then
+	echo -e "\033[97;44mphpUnit\033[0m"
+	vendor/bin/phpunit
+fi
+
+#if [ -d vendor/laravel/dusk ]; then
+#	echo -e "\033[97;44mLaravel Dusk\033[0m"
+#	laravel-dusk
+#fi
+
+if [ -f vendor/bin/phpcs ]; then
+	echo -e "\033[97;44mChecktyle PHP\033[0m"
+	composer check-style
+fi
+
+if [ -f package.json ] && cat package.json | jq -e '.scripts | has("lint")' > /dev/null; then
+	echo -e "\033[97;44mChecktyle JavaScript\033[0m"
+	yarn lint
+fi

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "usage: e:d <tag or commit>"
+	exit 1
+fi
+
+if [ ! -f vendor/bin/envoy ]; then
+	echo "Envoy not found in the working directory."
+	exit 1
+fi
+
+NAME=$(site-name)
+COMMIT="$1"
+
+if [ "$NAME" = "" ]; then
+	echo "No site name can be found for this project."
+	exit 1
+fi
+
+if [ "$COMMIT" = "head" ]; then
+	COMMIT=$(git log --pretty=format:'%h' -n 1)
+fi
+
+TAG=$(git tag -l --points-at "$COMMIT" | head -n 1)
+
+if [ "$TAG" != "" ]; then
+	COMMIT="$TAG"
+fi
+
+echo ">> Deploying $NAME @ $COMMIT"
+
+vendor/bin/envoy run deploy --commit="$COMMIT" && mark-deployment "$NAME" "$COMMIT"

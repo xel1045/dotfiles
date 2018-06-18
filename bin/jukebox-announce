@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+	echo "usage: jukebox-announce [-v voice] <message>"
+	exit
+fi
+
+say $@ -o jukebox-announce.aiff
+sox jukebox-announce.aiff jukebox-announce.wav
+
+scp jukebox-announce.wav jukebox:jukebox-announce.wav
+ssh jukebox 'sudo aplay jukebox-announce.wav; rm -f jukebox-announce.wav'
+
+rm -f jukebox-announce.aiff jukebox-announce.wav

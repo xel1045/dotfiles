@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Check if the repository is on specified branch.
+
+if [ $# -ne 1 ]; then
+	echo "Usage: git-is-branch <branch>"
+	exit 1
+fi
+
+parse_git_branch() {
+    git rev-parse --abbrev-ref HEAD
+}
+
+[[ "$(parse_git_branch 2>/dev/null)" = "$1" ]]

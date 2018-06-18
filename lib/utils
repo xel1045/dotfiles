@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+
+MIGRATIONS_DIR="$TOOLBOX/migrations"
+STORAGE_MIGRATIONS_DIR="$TOOLBOX/storage/migrations"
+
+function e_header()
+{
+    echo -e "\n$INDENT\033[1m$@\033[0m"
+}
+
+function e_success()
+{
+    echo -e "$INDENT \033[1;32m✔\033[0m $@"
+}
+
+function e_error()
+{
+    echo -e "$INDENT \033[1;31m✖\033[0m $@"
+}
+
+function e_arrow()
+{
+    echo -e "$INDENT \033[1;34m➜\033[0m $@"
+}
+
+function ask_yes_no()
+{
+    local question=$1
+    local prompt=" [y/n] "
+    local value=
+
+    while true; do
+        echo -ne "\033[33m$question$prompt\033[0m"
+        read -p "" -r
+        case "$REPLY" in
+            y*|Y*)
+                value=0
+                break
+                ;;
+            n*|N*)
+                value=1
+                break
+                ;;
+            *)
+                echo 'Please respond with `yes` or `no`.'
+                ;;
+        esac
+    done
+
+    return $value
+}
+
+function safe_execute()
+{
+    local cmd=$1
+    local success=$2
+    local failure=$3
+    local e_function=${4:-e_success}
+    local output status
+
+    output="$($cmd 2>&1)"
+    status=$?
+
+    if [ $status -eq 0 ]; then
+        $e_function "$success"
+    else
+        e_error "$failure"
+        echo "$output"
+        exit 1
+    fi
+}
+
+function backup_file()
+{
+    local file=$1
+
+    # Set backup flag, so a nice message can be shown at the end
+    BACKUP=1
+    # Create backup dir if it doesn't already exist
+    [ -e "$BACKUP_DIR" ] || safe_execute "mkdir -p $BACKUP_DIR" "Created $BACKUP_DIR directory" "Failed to create $BACKUP_DIR directory" "e_arrow"
+
+    safe_execute "mv $file $BACKUP_DIR" "Backed up $file" "Failed to backup $file" "e_arrow"
+}
+
+function backup_file_if_exists()
+{
+    local file=$1
+
+    [ -e "$file" ] && backup_file "$file"
+}
+
+function create_directory()
+{
+    local directory=$1
+
+    if [ -e "$directory" -a ! -d "$directory" ]; then
+        e_error "File $directory exists but is not a directory, exiting ..."
+        exit 1
+    else
+        safe_execute "mkdir -p $directory" "Created $directory directory" "Failed to create $directory directory"
+    fi
+}
+
+function link_file()
+{
+    local src=$1
+    local dest=$2
+
+    if [ -e "$dest" -a ! -L "$dest" ]; then
+        backup_file "$dest"
+    fi
+
+    safe_execute "ln -sfn $src $dest" "Linked $dest -> $src" "Failed to link $dest -> $src"
+}
+
+function copy_file()
+{
+    local src=$1
+    local dest=$2
+
+    if [ -e "$dest" ]; then
+        e_error "File $dest exists"
+    else
+        safe_execute "cp $src $dest" "Copied $src -> $dest" "Failed to copy $src -> $dest"
+    fi
+}
+
+function move_file()
+{
+    local src=$1
+    local dest=$2
+
+    if [ -e "$dest" ]; then
+        e_error "File $dest exists"
+    else
+        safe_execute "mv $src $dest" "Moved $src -> $dest" "Failed to move $src -> $dest"
+    fi
+}
+
+function remove_file()
+{
+    local file=$1
+
+    safe_execute "rm -f $file" "Removed $file" "Failed to remove $file"
+}
+
+function process_recursive()
+{
+    local action=$1
+    local files=($2/*)
+    local parent=$3
+
+    for file in "${files[@]}"; do
+        local base="$(basename $file)"
+        local dest="$parent/$base"
+
+        if [ -d "$file" ]; then
+            create_directory "$dest"
+            process_recursive "$action" "$file" "$dest"
+        else
+            "$action" "$file" "$dest"
+        fi
+    done
+}
+
+function remove_insert_from_file()
+{
+    local file=$1
+
+    # See: https://nixtricks.wordpress.com/2013/01/09/sed-delete-the-lines-lying-in-between-two-patterns/
+    /usr/bin/sed -i '' '/# EXOLNET-MACOS-TOOLBOX BEGIN/,/# EXOLNET-MACOS-TOOLBOX END/d' $file
+}
+
+function remove_insert_from_file2()
+{
+    local file=$1
+
+    # See: https://nixtricks.wordpress.com/2013/01/09/sed-delete-the-lines-lying-in-between-two-patterns/
+    /usr/bin/sed -i '' '/; EXOLNET-MACOS-TOOLBOX BEGIN/,/; EXOLNET-MACOS-TOOLBOX END/d' $file
+}

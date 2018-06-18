@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	echo "Usage: video-thumbnails <source-video> ... <destination-folder>"
+	exit 1
+fi
+
+VIDEO_COUNT=$(($#-1))
+DESTINATION=${!#}
+
+mkdir -p "$DESTINATION"
+
+for file in "${@:1:$VIDEO_COUNT}"; do
+	ffmpeg -i "$file" -vframes 1 -f image2 "$DESTINATION/${file%.*}.jpg"
+done

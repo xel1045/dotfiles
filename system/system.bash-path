@@ -1,0 +1,11 @@
+# Version of 2018-01-21
+#export PATH="~/Development/bin:$DOTFILES/bin:~/.composer/vendor/bin:/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/curl/bin:~/Library/Python/2.7/bin:/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin:/Users/xel/pebble-dev/PebbleSDK-current/bin:$PATH"
+
+export PATH="/usr/local/sbin:$PATH"
+export PATH="/usr/local/mysql/bin:$PATH"
+export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+export PATH="$HOME/.composer/vendor/bin:$PATH"
+export PATH="$DOTFILES/bin:$PATH"
+export PATH="$HOME/Development/bin:$PATH"
+
+export MANPATH="/usr/local/man:/usr/local/mysql/man:/usr/local/git/man:$MANPATH"

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+BASE_PATH=~/repositories
+
+# 1. Parse options
+for i in "$@"; do
+    case $i in
+        -p=*|--path=*)
+            BASE_PATH="${i#*=}"
+            shift
+            ;;
+        #--default)
+            #DEFAULT=YES
+            #shift
+            #;;
+        *)
+            # unknown option
+            ;;
+    esac
+done
+
+if [ $# -lt 1 ]; then
+    echo "usage: site-batch [OPTIONS] <command>"
+    exit 1
+fi
+
+COMMAND="$@"
+
+# 2. Loop through folder
+for PROJECT_PATH in $BASE_PATH/*/ ; do
+    cd "$PROJECT_PATH"
+
+    PROJECT_NAME="${PWD##*/}"
+
+    echo -e "\033[97;44m$PROJECT_NAME\033[0m"
+    eval "$COMMAND"
+done

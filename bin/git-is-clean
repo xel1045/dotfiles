@@ -1,0 +1,5 @@
+#!/bin/sh
+#
+# Check if the repository is in a clean state.
+
+git diff --quiet --ignore-submodules > /dev/null 2>&1

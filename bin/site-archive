@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Archive a website to the "Ω Archives" folder
+
+if [ $# -lt 1 ]; then
+	echo "Usage: site-archive <folder> [<database>]"
+	exit 1
+fi
+
+set -e
+
+# Source helpers
+. $DOTFILES/lib/utils
+
+PROJECT_NAME=$1
+PROJECT_FOLDER="$(pwd)/$PROJECT_NAME"
+ARCHIVE_FOLDER="$(date +%Y%m%d)-$PROJECT_NAME"
+ARCHIVE_DESTINATION="$(pwd)/Ω Archives"
+ARCHIVE_FINAL="$ARCHIVE_DESTINATION/$PROJECT_NAME.tar.gz"
+
+WORKING_DIRECTORY=$(pwd)
+
+if [ ! -d "$PROJECT_FOLDER" ]; then
+	echo "Folder $PROJECT_NAME/ does not exists"
+	exit 2
+fi
+
+if [ -f "$ARCHIVE_FINAL" ]; then
+	echo "Archive $ARCHIVE_FINAL already exists."
+	exit 3
+fi
+
+if [ -d "$ARCHIVE_FOLDER" ]; then
+	echo "Archive folder $ARCHIVE_FOLDER already exists."
+	exit 4
+fi
+
+DATABASE_DETECTED=$(cd $PROJECT_FOLDER; site-db-detect || echo "")
+
+if [ $# -gt 1 ]; then
+	DATABASE_NAME="$2"
+elif [[ "$DATABASE_DETECTED" != "" ]] && ask_yes_no "Backup database $DATABASE_DETECTED"; then
+	DATABASE_NAME="$DATABASE_DETECTED"
+elif ! ask_yes_no "Backup without any database"; then
+	echo "Abort archive."
+	exit 5
+fi
+
+#echo -e "\033[97;44m[1/6] Create the archive folder\033[0m"
+
+mkdir "$ARCHIVE_FOLDER"
+
+echo -e "\033[97;44m[2/6] Archive the database\033[0m"
+
+if [ "$DATABASE_NAME" != "" ]; then
+	mkdir "$ARCHIVE_FOLDER/databases"
+	mysqldump --login-path=local "$DATABASE_NAME" > "$ARCHIVE_FOLDER/databases/$DATABASE_NAME.sql"
+	mysql --login-path=local  -e "DROP DATABASE IF EXISTS \`$DATABASE_NAME\`"
+else
+	echo ">> No databases to archive."
+fi
+
+echo -e "\033[97;44m[3/6] Archive project files\033[0m"
+
+mv "$PROJECT_FOLDER" "$ARCHIVE_FOLDER/www"
+
+if [ -L ~"/Sites/$PROJECT_NAME" ]; then
+	echo -e "\033[97;44m[4/6] Remove symbolic link\033[0m"
+
+	rm -f ~"/Sites/$PROJECT_NAME"
+	touch "$ARCHIVE_FOLDER/site-symlink"
+fi
+
+echo -e "\033[97;44m[5/6] Compress archive\033[0m"
+
+mkdir -p "$ARCHIVE_DESTINATION"
+cd "$ARCHIVE_FOLDER"
+tar cvzf "$ARCHIVE_FINAL" *
+cd "$WORKING_DIRECTORY"
+
+echo -e "\033[97;44m[6/6] Clean up archive folder\033[0m"
+
+rm -rf "$ARCHIVE_FOLDER"

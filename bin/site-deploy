@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ $# -ne 1 ]; then
+	echo "usage: site-deploy <commit>"
+	exit
+fi
+
+if [ ! -f vendor/bin/envoy ]; then
+	echo "Envoy is not installed for this project."
+	exit
+fi
+
+set -e
+
+COMMIT="$1"
+
+if [ "$COMMIT" == "HEAD" ]; then
+	COMMIT=$(git rev-parse --short HEAD)
+fi
+
+vendor/bin/envoy run deploy --commit=$COMMIT
+
+mark-deployment "$(site-name)" $COMMIT

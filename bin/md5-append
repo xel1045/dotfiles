@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ $# -eq 0 ]; then
+	echo "Usage: md5-append <file> ..."
+fi
+
+for FILE in "$@"; do
+	HASH=$(md5sum "$FILE" | cut -d ' ' -f 1)
+	BASENAME="${FILE%.*}"
+	EXTENSION="${FILE##*.}"
+	TARGET="$BASENAME-${HASH:0:7}.$EXTENSION"
+
+	echo "$FILE -> $TARGET"
+	mv "$FILE" "$TARGET"
+done

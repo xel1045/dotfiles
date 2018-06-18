@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# Check if the repository has the specified branch.
+
+if [ $# -ne 1 ]; then
+	echo "Usage: git-is-branch <branch>"
+	echo "Valid branches: heads/develop, remotes/origin/develop, tags/v1.0"
+	exit 1
+fi
+
+git show-ref --verify --quiet "refs/$1"

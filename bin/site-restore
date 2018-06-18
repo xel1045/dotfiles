@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Restore a website from the "Ω Archives" folder
+
+if [ $# -lt 1 ]; then
+	echo "Usage: site-restore <project>"
+	exit 1
+fi
+
+set -e
+
+# Source helpers
+. $DOTFILES/lib/utils
+
+PROJECT_NAME=$1
+PROJECT_FOLDER="$(pwd)/$PROJECT_NAME"
+RESTORE_FOLDER="$(date +%Y%m%d)-$PROJECT_NAME"
+ARCHIVE_DESTINATION="$(pwd)/Ω Archives"
+ARCHIVE_FINAL="$ARCHIVE_DESTINATION/$PROJECT_NAME.tar.gz"
+
+if [ -d "$PROJECT_FOLDER" ]; then
+	echo "Folder $PROJECT_NAME/ already exists"
+	exit 2
+fi
+
+if [ ! -f "$ARCHIVE_FINAL" ]; then
+	echo "Archive $ARCHIVE_FINAL does not exists."
+	exit 3
+fi
+
+if [ -d "$RESTORE_FOLDER" ]; then
+	echo "Restore folder $RESTORE_FOLDER already exists."
+	exit 4
+fi
+
+mkdir "$RESTORE_FOLDER"
+tar xzfv "$ARCHIVE_FINAL"  -C "$RESTORE_FOLDER"
+
+if [ -d "$RESTORE_FOLDER/www" ]; then
+	echo -e "\033[97;44mRestore project files\033[0m"
+
+	mv "$RESTORE_FOLDER/www" "$PROJECT_NAME"
+fi
+
+if [ -d "$RESTORE_FOLDER/databases" ]; then
+	echo -e "\033[97;44mRestore databases\033[0m"
+
+	for SQL_FILE in "$RESTORE_FOLDER/databases"/* ; do
+		DATABASE_NAME=$(basename "$SQL_FILE" .sql)
+
+		mysql --login-path=local  -e "CREATE DATABASE \`$DATABASE_NAME\`"
+		mysql --login-path=local "$DATABASE_NAME" < $SQL_FILE
+	done
+fi
+
+echo -e "\033[97;44mClean up restore folder\033[0m"
+
+rm -rf "$RESTORE_FOLDER"
+
+if ask_yes_no "Remove archive file?"; then
+	rm -f "$ARCHIVE_FINAL"
+fi

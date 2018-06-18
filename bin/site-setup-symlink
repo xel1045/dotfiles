@@ -1,0 +1,7 @@
+#!/bin/bash
+
+NAME=${PWD##*/}
+SOURCE=$(pwd)/public
+TARGET=~/Sites/$NAME
+
+ln -sf $SOURCE $TARGET

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if ! git-is-clean; then
+	echo "You have modified/staged files. Please commit/reset them before proceeding."
+	exit
+fi
+
+set -e
+
+# Git
+echo -e "\033[97;44mUpdate repository\033[0m"
+
+git fetch origin
+git up
+
+# PHP dependencies
+echo -e "\033[97;44mUpdate PHP dependencies\033[0m"
+
+if [ -f composer.lock ]; then
+	composer install
+fi
+
+# Javascript dependencies
+echo -e "\033[97;44mUpdate Javascript dependencies\033[0m"
+
+if [ -f yarn.lock ]; then
+	yarn install --pure-lockfile
+elif [ -f package-lock.json ]; then
+	npm install
+elif [ -f package.json ]; then
+	yarn install --pure-lockfile
+fi
+
+if [ -f bower.json ]; then
+	bower install
+fi
+
+# Laravel
+echo -e "\033[97;44mUpdate database\033[0m"
+
+if [ -f artisan ]; then
+	if grep -q exolnet_dev .env*; then
+		php artisan migrate
+	fi
+
+	php artisan config:clear
+	php artisan route:clear
+	php artisan view:clear
+fi
+
+# Compilation des assets
+echo -e "\033[97;44mCompile assets\033[0m"
+
+if [ -f webpack.mix.js ]; then
+	yarn development
+elif [ -f gulpfile.js ]; then
+	gulp
+elif [ -f Gruntfile.js ]; then
+	grunt build:debug
+fi
+
+# Terminated
+echo -e "\033[97;44mWebsite updated!\033[0m"

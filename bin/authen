@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Par Alexandre D'Eschambeault
+# 2011-02-08
+# Référence : http://linuxproblem.org/art_9.html
+
+if [ $# -ne 1 ]; then
+	echo "Usage: authen [user@]hostname"
+	exit
+fi
+
+if [ ! -f ~/.ssh/id_rsa.pub ]; then
+	echo "Génération d'une pair de clé d'authentification (ne mettez pas de passphrase)."
+	ssh-keygen -t rsa
+fi
+
+cat ~/.ssh/id_rsa.pub | ssh $1 "mkdir -p ~/.ssh && chmod 0700 ~/.ssh && cat >> ~/.ssh/authorized_keys"

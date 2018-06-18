@@ -1,0 +1,67 @@
+#!/usr/bin/env php
+<?php
+
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+$databases = [];
+
+if (file_exists('.env')) {
+    $content = file_get_contents('.env');
+
+    if (preg_match('/(?:DB_DATABASE|DB_NAME)=(.+)/', $content, $match)) {
+        $databases[] = $match[1];
+    }
+}
+
+if (file_exists('wp-config.php')) {
+    $content = file_get_contents('wp-config.php');
+
+    if (preg_match('/define\(\'DB_NAME\', \'(.+)\'\);/', $content, $match)) {
+        $databases[] = $match[1];
+    }
+}
+
+if (file_exists('.env.local.php')) {
+    $content = include('.env.local.php');
+
+    if (array_key_exists('DATABASE_NAME', $content)) {
+        $databases[] = $content['DATABASE_NAME'];
+    }
+}
+
+if (file_exists('bootstrap/autoload.php') && file_exists('vendor/autoload.php')) {
+    try {
+        require 'bootstrap/autoload.php';
+
+        $configFiles = [
+            'app/config/local/database.php',
+            'app/config/database.php',
+            'config/database.php',
+        ];
+
+        foreach ($configFiles as $configFile) {
+            if (! file_exists($configFile)) {
+                continue;
+            }
+
+            $content = require($configFile);
+
+            if (isset($content['connections']['mysql']['database'])) {
+                $databases[] = $content['connections']['mysql']['database'];
+                break;
+            }
+        }
+    } catch (Throwable $e) {
+        // do nothing
+    } catch (Exception $e) {
+       // do nothing
+    }
+}
+
+$databases = array_unique(array_diff($databases, ['homestead', 'forge', 'database']));
+
+if (count($databases) === 0) {
+    exit(1);
+}
+
+echo implode(PHP_EOL, $databases) . PHP_EOL;

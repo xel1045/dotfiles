@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+
+$dbUser     = 'exolnet_dev';
+$dbHost     = 'localhost';
+$dbPassword = '';
+
+//==============================================================================
+
+$defaultName = basename(getcwd());
+$name = count($_SERVER['argv']) >= 2 ? $_SERVER['argv'][1] : $defaultName;
+$dbName = str_replace('-', '_', $name).'_dev';
+
+$isTest = in_array('-t', $_SERVER['argv']);
+
+try {
+	$db = new PDO('mysql:host='. $dbHost, $dbUser, $dbPassword);
+
+	if ( ! $isTest) {
+		$db->exec('CREATE DATABASE IF NOT EXISTS '. $dbName);
+	}
+} catch (PDOException $e) {
+	echo 'Connection failed: ' . $e->getMessage();
+	exit(1);
+}
+
+if ( ! file_exists('.env') && file_exists('.env.example')) {
+	copy('.env.example', '.env');
+}
+
+if (file_exists('.env')) {
+	$content = file_get_contents('.env');
+
+	$content = preg_replace('/^DB_HOST=(.*)$/m', 'DB_HOST='. $dbHost, $content);
+	$content = preg_replace('/^DB_DATABASE=(.*)$/m', 'DB_DATABASE='. $dbName, $content);
+	$content = preg_replace('/^DB_USERNAME=(.*)$/m', 'DB_USERNAME='.$dbUser, $content);
+	$content = preg_replace('/^DB_PASSWORD=(.*)$/m', 'DB_PASSWORD='.$dbPassword, $content);
+
+	if ( ! $isTest) {
+		file_put_contents('.env', $content);
+	} else {
+		echo $content;
+	}
+}

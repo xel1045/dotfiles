@@ -1,0 +1,63 @@
+#!/bin/sh
+
+# 1. Get the last version of history
+git fetch
+
+# 2. Ensure master and develop branches are clean, i.e., there's nothing to push
+if [[ $(git log origin/master..master 2> /dev/null) != "" ]]; then
+	echo "Error: Your master branch have unpushed commits"
+	exit 1
+fi
+
+if [[ $(git log origin/develop..develop 2> /dev/null) != "" ]]; then
+	echo "Error: Your develop branch have unpushed commits"
+	exit 1
+fi
+
+# 3. Pull master and develop branch to the last revision
+git checkout --quiet develop
+git pull --rebase --log --quiet origin develop
+
+git checkout --quiet master
+git pull --rebase --log --quiet origin master
+
+# 4. Ensure the last commit on the develop branch is not in the master branch
+if [[ $(git log master..develop 2> /dev/null) == "" ]]; then
+	echo "Error: Nothing to deploy. The last commit on develop is already on master."
+	exit 1
+fi
+
+# 5. Retrieve the last tagged version
+LAST_TAG=$(git describe --exact-match --abbrev=0 2> /dev/null)
+
+read -p "Version number (current $LAST_TAG)? " VERSION
+
+if ! [[ $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+	echo "Error: Invalid version format."
+	exit 1
+fi
+
+# 6. Merge develop into master
+git merge --no-edit --no-ff --log develop
+echo ""
+
+# 7. Tag the last commit in master
+git tag -a -m "" "$VERSION"
+
+# 8. Ask the user to confirm the deployment, if no, revert the master branch
+echo "New history:"
+git --no-pager log --tags --pretty=format:"%h %d %s" --graph -5
+echo ""
+
+read -p "Confirm deployment? " YN
+
+if ! [[ $YN =~ ^[Yy]$ ]]; then
+	echo "Rolling back..."
+
+	git tag -d "$VERSION" > /dev/null
+	git reset -q --hard origin/master
+	exit
+fi
+
+# 9. Push the master branch
+git push --tags origin

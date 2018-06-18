@@ -1,0 +1,4 @@
+#!/bin/bash
+# dot-config - Get and set repository or global options
+
+git config --file ~/.dotconfig $@

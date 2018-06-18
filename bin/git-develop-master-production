@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -eu
+
+git fetch
+
+# develop -> master
+git checkout master
+git reset origin/master --hard
+git merge develop --no-ff
+
+# master -> production
+git checkout production
+git reset origin/production --hard
+git merge master --no-ff
+
+# production -> master
+git checkout master
+git rebase production
+
+# master -> develop
+git checkout develop
+git rebase master

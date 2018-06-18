@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php
+
+if (count($_SERVER['argv']) !== 2) {
+	echo 'Usage: git redmine-validate <commit>'. PHP_EOL;
+	exit;
+}
+
+$commit = $_SERVER['argv'][1];
+
+$message = trim(shell_exec('git log --format=%B -n 1 "'. $commit .'" 2>/dev/null'));
+
+if ( ! $message) {
+	echo 'No message found for this commit.'. PHP_EOL;
+	exit;
+}
+
+preg_match_all('/\#(\d+)/', $message, $matches);
+
+if (count($matches[1]) === 0) {
+	echo 'No issues referenced by this commit.'. PHP_EOL;
+	exit;
+}
+
+foreach ($matches[1] as $issueId) {
+	$command = 'php /Users/xel/repositories/automate-everything/artisan redmine:validate '. $issueId .' --force';
+
+	echo '>> '. $command.PHP_EOL;
+	echo shell_exec($command).PHP_EOL;
+}
+

@@ -1,0 +1,31 @@
+#!/bin/bash -i
+
+if [ $# -lt 2 ]; then
+	echo "usage: m:r <command> <projects...>"
+	exit 1
+fi
+
+CURRENT_PATH=$(pwd)
+
+COMMAND=$1
+shift
+
+shopt -s expand_aliases
+source ~/.profile
+
+for PROJECT in "$@"; do
+	NAME=${PROJECT##*/}
+	php -r 'echo "\e[42m";'
+	echo -n ">> $NAME <<"
+	php -r 'echo "\e[0m";'
+	echo ""
+
+	if [ ! -d "$PROJECT" ]; then
+		echo "Not found"
+		continue
+	fi
+
+	cd $PROJECT
+	eval $COMMAND
+    cd $CURRENT_PATH
+done
