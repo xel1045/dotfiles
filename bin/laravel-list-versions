@@ -1,0 +1,28 @@
+#!/bin/bash
+
+for d in $(pwd)/*/ ; do
+	cd "$d";
+
+	if [ ! -f composer.lock ]; then
+		continue
+	fi
+
+	if [ ! -d vendor/ ]; then
+		continue
+	fi
+
+	if [ ! -f artisan ]; then
+		continue
+	fi
+
+	LARAVEL_VERSION=$(composer show --format=json | jq -r '.installed[] | select(.name | contains("laravel/framework")) | .version' 2>/dev/null)
+
+	if [ "$LARAVEL_VERSION" = "" ]; then
+		continue
+	fi
+
+	PROJECT=${PWD##*/}
+
+	echo "$PROJECT: $LARAVEL_VERSION"
+done
+

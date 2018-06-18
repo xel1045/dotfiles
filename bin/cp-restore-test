@@ -1,0 +1,90 @@
+#!/bin/bash
+
+RESTORE_DATE=$(date +%Y%m%d -d "yesterday")
+RESTORE_DATE_PATH="${RESTORE_DATE:0:4}/${RESTORE_DATE:4:2}/${RESTORE_DATE:6:2}"
+RESTORE_FOLDER=~/Desktop/$RESTORE_DATE-cp-restore
+RESTORE_S3_BASE="s3://exolnet-backups-critical/servers/maxwell.exolnet.com"
+RESTORE_CREDENTIAL_ID=727
+
+if [ -d "$RESTORE_FOLDER" ]; then
+	echo "The restore folder $RESTORE_FOLDER already exists."
+	exit 1
+fi
+
+# Source helpers
+. $DOTFILES/lib/utils
+
+# Create the restore
+mkdir -p $RESTORE_FOLDER
+cd $RESTORE_FOLDER
+
+set -e
+
+# Retrieve backups from AWS
+e_header "Retrieve backups from AWS"
+
+aws s3 cp "$RESTORE_S3_BASE/db/mysql/mysql-$RESTORE_DATE.tar.gz.enc" $RESTORE_FOLDER
+e_success "MySQL backup downloaded"
+
+aws s3 cp "$RESTORE_S3_BASE/fs/$RESTORE_DATE_PATH/var/www/vhosts/cp.exolnet.com.tar.gz.enc" $RESTORE_FOLDER
+e_success "Files backup downloaded"
+
+# Decrypt the backups
+e_header "Decrypt the backups"
+
+RESTORE_ENCRYPTION_KEY=$(cp-cli credential:show --safe --password $RESTORE_CREDENTIAL_ID)
+e_success 'Credential "Maxwell Backup Encryption Key" retrieved'
+
+openssl enc -d -aes-256-cbc -md sha256 -in "mysql-$RESTORE_DATE.tar.gz.enc" -out "mysql.tar.gz" -k "$RESTORE_ENCRYPTION_KEY"
+e_success "MySQL backup decrypted"
+
+openssl enc -d -aes-256-cbc -md sha256 -in "cp.exolnet.com.tar.gz.enc" -out "www.tar.gz" -k "$RESTORE_ENCRYPTION_KEY"
+e_success "Files backup decrypted"
+
+# Uncompress the backups
+e_header "Uncompress the backups"
+
+tar xzf mysql.tar.gz
+e_success "MySQL backup uncompressed"
+
+tar xzf www.tar.gz
+e_success "Files backup uncompressed"
+
+# Test file are presents
+set +e
+
+function test_file()
+{
+    local src=$1
+    local src_name=$(basename $src)
+
+    safe_execute "[ -e $src ]" "File $src_name exits" "File $src_name does not exits"
+}
+
+e_header "Test file are presents"
+
+test_file "tmp/backup/$RESTORE_DATE_PATH/db/mysql/exolnet_panel.sql"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/index.php"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/.env"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/application/vendor/autoload.php"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/asset/js/app.js"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/files/expenses/5a0b50ba7975c_2017_12_01_frais_trimestriels_adt.pdf"
+test_file "var/www/vhosts/cp.exolnet.com/httpdocs/application/logs/$RESTORE_DATE_PATH.php"
+
+# Resetting the database
+set -e
+
+e_header "Resetting the database"
+
+mysql --login-path=local -e "DROP DATABASE IF EXISTS exolnet_panel_restore"
+mysql --login-path=local -e "CREATE DATABASE exolnet_panel_restore"
+e_success "Database exolnet_panel_restore emptied"
+
+mysql --login-path=local exolnet_panel_restore < tmp/backup/$RESTORE_DATE_PATH/db/mysql/exolnet_panel.sql
+e_success "Database restored onto exolnet_panel_restore"
+
+# Cleanup
+if ask_yes_no "Delete the restoration folder?"; then
+	rm -rf $RESTORE_FOLDER
+fi
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo -e "\033[97;44mStarting temporary server on 127.0.0.1:8000\033[0m"
+
+php artisan serve --env=dusk.testing > /dev/null 2>&1 &
+SERVE_PID=$!
+
+echo -e "\033[97;44mRunning browser tests\033[0m"
+APP_ENV=testing php artisan dusk $@
+
+echo -e "\033[97;44mStopping temporary server\033[0m"
+kill -- -$(ps -o pgid= $SERVE_PID | grep -o '[0-9]*')
