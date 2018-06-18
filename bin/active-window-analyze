@@ -1,0 +1,7 @@
+#!/bin/bash
+
+IP=$(/usr/sbin/ipconfig getifaddr en0)
+
+if [[ "$IP" =~ ^10\.0\.[0-9]+\.[0-9]+$ ]]; then
+	echo "$(date +"%Y-%m-%d %H:%M")	$IP	$($DOTFILES/bin/active-window-inspector)"
+fi
