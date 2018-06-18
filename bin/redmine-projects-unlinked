@@ -1,0 +1,85 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'rubygems'
+require 'mysql'
+
+Version = "1.0"
+
+$quiet        = false
+$redmine_host = 'https://redmine.exolnet.com/'
+$redmine_key  = '******'
+$cp_host      = 'exolnet.com'
+$cp_database  = 'exolnet_panel'
+$cp_user      = 'cp_remote'
+$cp_pass      = ''******'
+$ignore       = ["CME Solutions", "CME WTC", "Connect & Go", "GLG Communications Inc.", "LMG Communication", "Desjardins"]
+
+def log(text, options={})
+  puts text unless $quiet
+  exit 1 if options[:exit]
+end
+
+def system_or_raise(command)
+  raise "\"#{command}\" failed" unless system command
+end
+
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: redmine-projects-unlinked [OPTIONS...]"
+  opts.separator("")
+  opts.separator("Retrieve the list of Redmine projects that are not binded with the CP.")
+  opts.separator("")
+  opts.separator("Options:")
+  opts.on("-V", "--version",           "show version and exit") {puts Version; exit}
+  opts.on("-h", "--help",              "show help and exit") {puts opts; exit 1}
+  opts.on("-q", "--quiet",             "no log") {$quiet = true}
+end
+optparse.parse!
+
+begin
+  require 'active_resource'
+rescue LoadError
+  log("This script requires activeresource.\nRun 'gem install activeresource' to install it.", :exit => true)
+end
+
+class BaseAPI < ActiveResource::Base
+  self.headers["X-Redmine-API-Key"] = $redmine_key
+  self.format = :xml
+end
+
+class Project < BaseAPI
+  self.element_name = "project"
+end
+
+$redmine_host.gsub!(/^/, "http://") unless $redmine_host.match("^https?://")
+$redmine_host.gsub!(/\/$/, '')
+
+BaseAPI.site = "#{$redmine_host}";
+
+begin
+  # Get all active projects that have the Repository module enabled
+  projects = Project.all(params: {limit: 500})
+
+  db = Mysql.new $cp_host, $cp_user, $cp_pass, $cp_database
+  rs = db.query("SELECT redmine_project_id FROM project_redmine_relation")
+
+  ids = Hash.new
+
+  rs.each_hash do |row|
+    project_id = row["redmine_project_id"]
+    ids[project_id] = true
+  end
+
+  projects.each do |project|
+    log(project.name) unless ids.has_key?(project.id) or $ignore.include?(project.name)
+  end
+rescue ActiveResource::ForbiddenAccess
+  log("Request was denied by your Redmine server. Make sure that 'WS for repository management' is enabled in application settings and that you provided the correct API key.")
+rescue Mysql::Error => e
+  puts e.errno
+  puts e.error
+ensure
+  db.close if db
+#rescue => e
+#  log("Unable to connect to #{BaseAPI.site}: #{e}", :exit => true)
+end

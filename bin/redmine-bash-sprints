@@ -1,0 +1,120 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'rubygems'
+require 'date'
+require 'uri'
+
+Version = "1.0"
+
+$quiet        = false
+$redmine_host = 'https://redmine.exolnet.com/'
+$redmine_key  = '******'
+$test         = false
+$week         = 1
+$index        = 1
+$format       = "Sprint %d"
+
+def log(text, options={})
+  puts text unless $quiet
+  exit 1 if options[:exit]
+end
+
+def system_or_raise(command)
+  raise "\"#{command}\" failed" unless system command
+end
+
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: redmine-bash-sprints [OPTIONS...] <identifier> <to> [<from>]"
+  opts.separator("")
+  opts.separator("Create versions in bash for a project")
+  opts.separator("")
+  opts.separator("Options:")
+  opts.on("-w", "--week week",         "number of weeks per sprint") {|v| $week = v.to_i}
+  opts.on("-f", "--format format",     "sprint name format (default to Sprint %d)") {|v| $format = v}
+  opts.on("-i", "--index index",       "index to start with") {|v| $index = v.to_i}
+  opts.on("-t", "--test",              "only show what should be done") {$test = true}
+  opts.on("-V", "--version",           "show version and exit") {puts Version; exit}
+  opts.on("-h", "--help",              "show help and exit") {puts opts; exit 1}
+  opts.on("-q", "--quiet",             "no log") {$quiet = true}
+end
+optparse.parse!
+
+unless ARGV.length.between?(2, 3)
+  log(optparse, :exit => true)
+end
+
+identifier = ARGV[0]
+endOn      = Date.strptime(ARGV[1], '%Y-%m-%d')
+startOn    = ARGV.length >= 3 ? Date.strptime(ARGV[2], '%Y-%m-%d') : Date.today
+
+if $test
+  log("running in test mode")
+end
+
+begin
+  require 'active_resource'
+rescue LoadError
+  log("This script requires activeresource.\nRun 'gem install activeresource' to install it.", :exit => true)
+end
+
+class BaseAPI < ActiveResource::Base
+  self.headers["X-Redmine-API-Key"] = $redmine_key
+  self.format = :xml
+end
+
+class Project < BaseAPI
+  self.element_name = "project"
+end
+
+class ProjectVersion < BaseAPI
+  self.element_name = "version"
+  belongs_to :project
+end
+
+$redmine_host.gsub!(/^/, "http://") unless $redmine_host.match("^https?://")
+$redmine_host.gsub!(/\/$/, '')
+
+BaseAPI.site = "#{$redmine_host}";
+
+begin
+  # Get all active projects that have the Repository module enabled
+  project = Project.find(identifier)
+
+  daysPerSprint = 7 * $week
+  sprintCount   = (endOn - startOn).to_i / daysPerSprint
+  date          = endOn - (sprintCount * daysPerSprint)
+
+  log("Creating #{sprintCount} sprints...")
+
+  for i in 0..sprintCount
+    index = i + $index
+
+    name    = $format % [index]
+    startOn = date - daysPerSprint + 1
+    endOn   = date
+
+    log("#{name} from #{startOn} to #{endOn}")
+
+    ProjectVersion.site = "#{$redmine_host}/projects/:project_id"
+
+    unless $test
+      version = ProjectVersion.new({
+        :project_id => project.id,
+        :name => name,
+        :due_date => endOn,
+        :custom_fields => [
+          {:id => 14, :value => startOn}
+        ]
+      })
+
+      version.save
+    end
+
+    date += daysPerSprint
+  end
+rescue ActiveResource::ForbiddenAccess
+  log("Request was denied by your Redmine server. Make sure that 'WS for repository management' is enabled in application settings and that you provided the correct API key.")
+#rescue => e
+#  log("Unable to connect to #{BaseAPI.site}: #{e}", :exit => true)
+end
