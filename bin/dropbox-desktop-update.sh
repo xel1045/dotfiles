@@ -1,7 +1,7 @@
 #!/bin/bash
 
-SOURCE="/Users/xel/Desktop"
-TARGET="/Users/xel/Dropbox/Desktop"
+SOURCE="$HOME/Desktop"
+TARGET="$HOME/Dropbox/Desktop"
 MAX_SIZE=524288 # 512 MB
 
 

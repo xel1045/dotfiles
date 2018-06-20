@@ -23,7 +23,7 @@ if (count($matches[1]) === 0) {
 }
 
 foreach ($matches[1] as $issueId) {
-	$command = 'php /Users/xel/repositories/automate-everything/artisan redmine:validate '. $issueId .' --force';
+	$command = 'php /Users/adeschambeault/repositories/automate-everything/artisan redmine:validate '. $issueId .' --force';
 
 	echo '>> '. $command.PHP_EOL;
 	echo shell_exec($command).PHP_EOL;

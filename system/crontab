@@ -1,4 +1,4 @@
-# To activate on OSX  $ crontab ~/.crontab
+# To activate on OSX, $ crontab ~/.crontab, and copy this content.
 
 MAILTO=xel1045@gmail.com
 

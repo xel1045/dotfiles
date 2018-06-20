@@ -15,4 +15,4 @@ ssh -A ubuntu@testapi.connectngo.com << EOF
 EOF
 
 mark-deployment "Test API" $COMMIT 15m "Deployments - CnG"
-php /Users/xel/repositories/automate-everything/artisan timelog --now --duration=15m --category="Connect & Go - Support Dusty" --task=Déploiement --comment="Déploiement de l'API de test @ $COMMIT"
+php $HOME/repositories/automate-everything/artisan timelog --now --duration=15m --category="Connect & Go - Support Dusty" --task=Déploiement --comment="Déploiement de l'API de test @ $COMMIT"

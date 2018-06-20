@@ -1,9 +1,9 @@
 #!/usr/bin/php
 <?php
 
-$projects_path = '/Users/xel/Documents/Projets';
-$desktop_path  = '/Users/xel/Desktop';
-$archives_path = '/Users/xel/Backups/Projets';
+$projects_path = '/Users/adeschambeault/Documents/Projets';
+$desktop_path  = '/Users/adeschambeault/Desktop';
+$archives_path = null; //'/Users/adeschambeault/Backups/Projets';
 $archive_after = 5;
 
 //==============================================================================
@@ -28,11 +28,12 @@ $actual = ucwords(strftime('%Y %B'));
 if ( ! file_exists($projects_path.$actual)) {
 	echo 'Creating project folder '.$actual.PHP_EOL;
 	mkdir($projects_path.$actual);
-
-	$desktop_name = ucwords(strftime('%B %Y'));
-	symlink($projects_path.$actual, $desktop_path.$desktop_name);
 }
 
+$desktop_name = ucwords(strftime('%B %Y'));
+if (! file_exists($desktop_path.$desktop_name)) {
+	symlink($projects_path.$actual, $desktop_path.$desktop_name);
+}
 
 // Archivage des vieux dossiers de sauvegarde par mois
 if ($archives_path && $dh = opendir($projects_path)) {
