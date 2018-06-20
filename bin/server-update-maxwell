@@ -1,0 +1,18 @@
+#!/bin/bash
+
+cd ~/repositories/exolnet-ansible
+
+set -e
+
+# Source helpers
+. $DOTFILES/lib/utils
+
+LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
+
+ansible-playbook site-update.yml --limit maxwell.exolnet.com --check -v --diff 2>&1 | tee "$LOG_OUTPUT"
+
+redmine-attachment-add 17609 "$LOG_OUTPUT"
+
+if ask_yes_no "Remove local log file?"; then
+	rm -f "$LOG_OUTPUT"
+fi

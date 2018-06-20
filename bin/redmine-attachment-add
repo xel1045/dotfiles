@@ -1,0 +1,52 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+	echo "Usage: redmine-attachment-add <issue> <files...>"
+	exit 1
+fi
+
+ISSUE_ID=$1
+shift
+
+REDMINE_URL=$(dot-config --get redmine.url)
+REDMINE_KEY=$(dot-config --get redmine.key)
+
+if [[ $REDMINE_URL = "" || $REDMINE_KEY = "" ]]; then
+	echo "Error: You need to configure redmine.url and redmine.key first."
+	exit 1
+fi
+
+for FILE in "$@"; do
+	if [ ! -f "$FILE" ]; then
+		echo "File $FILE does not exists."
+		exit 2
+	fi
+
+	FILE_NAME=$(basename "$FILE")
+	CONTENT_TYPE=$(file -b --mime-type "$FILE")
+
+	ATTACHMENT=$(curl -X POST -H "Content-Type: application/octet-stream" -H "X-Redmine-API-Key: $REDMINE_KEY" --data-binary "@$FILE" "$REDMINE_URL/uploads.json")
+	ATTACHMENT_ID=$(echo "$ATTACHMENT" | jq -r '.upload.token')
+
+	if [ "$ATTACHMENT_ID" = "" ]; then
+		echo "Error: cannot upload attachment ($ATTACHMENT)"
+		exit 3
+	fi
+
+	read -r -d ''  ATTACH_DATA << EOF
+{
+	"issue": {
+		"notes": "Attachment added",
+		"uploads": [
+			{
+				"token": "$ATTACHMENT_ID",
+				"filename": "$FILE_NAME",
+				"content_type": "$CONTENT_TYPE"
+			}
+		]
+	}
+}
+EOF
+
+	curl -X PUT -H "Content-Type: application/json" -H "X-Redmine-API-Key: $REDMINE_KEY" --data "$ATTACH_DATA" "$REDMINE_URL/issues/$ISSUE_ID.json"
+done
