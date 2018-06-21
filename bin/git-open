@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Open the repository in Source Tree
+
+if [ $# -eq 0 ]; then
+	GIT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+
+	stree "$GIT_ROOT"
+	exit
+fi
+
+for GIT_ROOT in "$@"; do
+	stree "$GIT_ROOT"
+done
