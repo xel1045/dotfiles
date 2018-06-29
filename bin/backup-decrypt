@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+    echo "Usage: backup-decrypt <ENCRYPTION_KEY_ID> <FILES...>"
+    exit 1
+fi
+
+DECRYPTION_SCRIPT="$HOME/repositories/exolnet-internals/scripts/backup/backup-decrypt.sh"
+
+if [ ! -f "$DECRYPTION_SCRIPT" ]; then
+	echo "eXolnet internal backup script not found"
+	exit 2
+fi
+
+ENCRYPTION_KEY_ID=$1
+shift
+
+ENCRYPTION_KEY=$(backup-encryption-key "$ENCRYPTION_KEY_ID")
+
+if [ $? -ne 0 ]; then
+    echo "$ENCRYPTION_KEY"
+    exit 3
+fi
+
+for FILE in $@; do
+	"$DECRYPTION_SCRIPT" "$ENCRYPTION_KEY" "$FILE"
+done

@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Archive a website to the "Ω Archives" folder
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    echo "Usage: backup-archive <folder> [<name[.tar.gz]>]"
+    exit 1
+fi
+
+SOURCE_FOLDER=$1
+ARCHIVE_DEFAULT=$(basename "$SOURCE_FOLDER")
+ARCHIVE_DESTINATION=${2:-$ARCHIVE_DEFAULT}
+
+if [[ "$ARCHIVE_DESTINATION" != *.tar.gz ]]; then
+    ARCHIVE_DESTINATION="$ARCHIVE_DESTINATION.tar.gz"
+fi
+
+if [ ! -d "$SOURCE_FOLDER" ]; then
+    echo "No folder found at $SOURCE_FOLDER"
+    exit 1
+fi
+
+if [ -f "$ARCHIVE_DESTINATION" ]; then
+    echo "Archive $ARCHIVE_DESTINATION already exists."
+    exit 2
+fi
+
+tar cvzf "$ARCHIVE_DESTINATION" "$SOURCE_FOLDER"
