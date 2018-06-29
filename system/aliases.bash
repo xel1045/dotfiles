@@ -89,6 +89,9 @@ alias afk="/System/Library/CoreServices/Menu\ Extras/User.menu/Contents/Resource
 # Reload the shell (i.e. invoke as a login shell)
 alias reload="exec $SHELL -l"
 
+# Dotfiles
+alias dotedit="e $DOTFILES"
+
 # Docker
 alias ubuntu="docker run -it --rm -v `pwd`:/workspace phusion/baseimage bash"
 alias amazonlinux="docker run -it --rm -v `pwd`:/workspace amazonlinux bash"
