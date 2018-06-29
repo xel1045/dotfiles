@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Check unmerged branched for a related user.
+
+if [ $# -ne 2 ]; then
+	echo "Usage: git-unmerged-for-user <branch> <email>"
+	exit 1
+fi
+
+expected_branch=$1
+expected_user=$2
+
+branches=$(git branch -r --no-merged "$expected_branch" | grep -v HEAD | grep -v master | grep -v develop | grep -v "$expected_branch")
+
+for branch in ${branches}; do
+	branch_user=$(git log -1 --format="%ae" "$branch")
+
+	if [ "$branch_user" != "$expected_user" ]; then
+		continue
+	fi
+
+	echo $branch
+done
