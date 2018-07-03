@@ -10,7 +10,7 @@ $archive_after = 5;
 
 $projects_path = realpath($projects_path).'/';
 $desktop_path  = realpath($desktop_path).'/';
-$archives_path = realpath($archives_path).'/';
+$archives_path = $archives_path ? realpath($archives_path).'/' : null;
 
 
 set_time_limit(0);
