@@ -33,10 +33,10 @@ for FILE in "$@"; do
 		exit 3
 	fi
 
+	# To a a note, add the following: "notes": "Attachment added",
 	read -r -d ''  ATTACH_DATA << EOF
 {
 	"issue": {
-		"notes": "Attachment added",
 		"uploads": [
 			{
 				"token": "$ATTACHMENT_ID",

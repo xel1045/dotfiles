@@ -9,7 +9,7 @@ set -e
 
 LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
 
-ansible-playbook site-update.yml --limit maxwell.exolnet.com --check -v --diff 2>&1 | tee "$LOG_OUTPUT"
+ansible-playbook site-update.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
 
 redmine-attachment-add 17609 "$LOG_OUTPUT"
 
