@@ -1,0 +1,15 @@
+#!/bin/bash
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$CURRENT_BRANCH" == "master" ]; then
+	exit 1
+fi
+
+git show-branch -a \
+	| grep '\*' \
+	| grep -v $CURRENT_BRANCH \
+	| grep -v HEAD \
+	| head -n1 \
+	| sed 's/.*\[\(.*\)\].*/\1/' \
+	| sed 's/[\^~].*//'

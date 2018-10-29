@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+if (process.argv.length !== 4) {
+    console.error('Usage: site-screenshot <url> <screenshot.png>');
+    process.exit(1);
+}
+
+const url  = process.argv[2];
+const file = process.argv[3];
+
+const puppeteer = require('/usr/local/lib/node_modules/puppeteer');
+
+(async () => {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    page.setViewport({
+        width: 1280,
+        height: 720
+    });
+
+    await page.goto(url, {
+        waitUntil: 'networkidle2'
+    });
+
+    await page.screenshot({
+        path: file,
+        fullPage: true
+    });
+
+    await browser.close();
+})();

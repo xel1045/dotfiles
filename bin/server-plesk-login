@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ "$#" -ne 1 ]; then
+    echo "No host was given" >&2
+    exit 1
+fi
+
+url="$(ssh -q $1 'sudo plesk login | head -n 1')"
+
+open "$url" &> /dev/null
+
