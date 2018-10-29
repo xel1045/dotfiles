@@ -4,7 +4,10 @@
 
 set -e
 
-if [ -f phpunit.xml ]; then
+if [ -f composer.json ] && jq -e '.scripts["test"]' composer.json >/dev/null 2>&1; then
+	echo -e "\033[97;44mphpUnit\033[0m"
+	composer test
+elif [ -f phpunit.xml ] && [ -f vendor/bin/phpunit ]; then
 	echo -e "\033[97;44mphpUnit\033[0m"
 	vendor/bin/phpunit
 fi
@@ -14,9 +17,9 @@ fi
 #	laravel-dusk
 #fi
 
-if [ -f vendor/bin/phpcs ]; then
+if [ -f composer.json ] && jq -e '.scripts["lint"]' composer.json; then
 	echo -e "\033[97;44mChecktyle PHP\033[0m"
-	composer check-style
+	composer lint
 fi
 
 if [ -f package.json ] && cat package.json | jq -e '.scripts | has("lint")' > /dev/null; then
