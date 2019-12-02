@@ -1,0 +1,89 @@
+#!/bin/bash
+
+set -e
+
+# Source helpers
+. $DOTFILES/lib/utils
+
+if [ ! -f config/deploy.php ]; then
+    e_error "config/deploy.php file does not exists."
+    exit 1
+fi
+
+if [ ! -f .env ]; then
+    e_error ".env file does not exists."
+    exit 1
+fi
+
+read_var() {
+    VAR=$(echo "$2" | grep $1 | xargs)
+    IFS="=" read -ra VAR <<< "$VAR"
+    echo ${VAR[1]}
+}
+
+read_config() {
+    php -r "\$config = include('config/deploy.php'); echo implode(PHP_EOL, (array)\$config['environments']['production']['$1']);"
+}
+
+e_header "CONFIGURATION"
+
+LOCAL_ENV=$(cat .env)
+LOCAL_DB_DATABASE=$(read_var DB_DATABASE "$LOCAL_ENV")
+TARGET_SERVER=$(read_config server)
+TARGET_PATH=$(read_config deploy_to)
+TARGET_LINKED_DIRS=$(read_config linked_dirs)
+
+echo "Local database: $LOCAL_DB_DATABASE"
+echo "Target server: $TARGET_SERVER"
+echo "Target path: $TARGET_PATH"
+
+if ssh $TARGET_SERVER "[ ! -f $TARGET_PATH/current/.env ]" 2>/dev/null; then
+    echo ".env file does not exists on target server."
+    exit 1
+fi
+
+TARGET_ENV=$(ssh $TARGET_SERVER "cat $TARGET_PATH/current/.env" 2>/dev/null)
+
+TARGET_DB_DATABASE=$(read_var DB_DATABASE "$TARGET_ENV")
+TARGET_DB_USERNAME=$(read_var DB_USERNAME "$TARGET_ENV")
+TARGET_DB_PASSWORD=$(read_var DB_PASSWORD "$TARGET_ENV")
+
+echo "Target database: $TARGET_DB_DATABASE"
+
+e_header "CLONE DATABASE"
+
+if ask_yes_no "Would you like to clone remote database?"; then
+    BASE_DB_FILENAME=$(date "+%Y%m%d%H%M%S")-database
+
+    mysqldump --login-path=local $LOCAL_DB_DATABASE | gzip -3 - > $BASE_DB_FILENAME-local.sql.gz 2>/dev/null
+    e_success "Backuping local database"
+
+    e_arrow "Backuping target database"
+    ssh $TARGET_SERVER "mysqldump -u $(whoami) --password $TARGET_DB_DATABASE | gzip -3 -c" > $BASE_DB_FILENAME-target.sql.gz
+    e_success "Backuping target database"
+
+    mysql --login-path=local -e "DROP DATABASE $LOCAL_DB_DATABASE"
+    mysql --login-path=local -e "CREATE DATABASE $LOCAL_DB_DATABASE"
+    e_success "Empty local database"
+
+    gunzip < $BASE_DB_FILENAME-target.sql.gz | mysql --login-path=local $LOCAL_DB_DATABASE
+    e_success "Import target data into local database"
+fi
+
+e_header "CLONE LINKED DIRECTORIES"
+
+for LINKED_DIR in $TARGET_LINKED_DIRS; do
+    if ssh $TARGET_SERVER "[ ! -d $TARGET_PATH/shared/$LINKED_DIR ]" 2>/dev/null; then
+        continue
+    fi
+
+    if [ ! -d $LINKED_DIR ]; then
+        continue
+    fi
+
+    if ! ask_yes_no "Would you like to clone $LINKED_DIR?"; then
+        continue
+    fi
+
+    rsync -avz $TARGET_SERVER:$TARGET_PATH/shared/$LINKED_DIR/ $LINKED_DIR/
+done
