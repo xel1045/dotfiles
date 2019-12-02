@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if $HOME/.dotfiles/bin/exo-is-network; then
+if exo-scripts utils is-netowrk; then
 	IP=$(/usr/sbin/ipconfig getifaddr en0)
 
 	echo "$(date +"%Y-%m-%d %H:%M")	$IP	$($HOME/.dotfiles/bin/active-window-inspector)"
