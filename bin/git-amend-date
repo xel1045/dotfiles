@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# Amend the date of the last commit.
+
+if [ $# -ne 1 ]; then
+    echo "Usage: git-amend-date <date>"
+    exit 1
+fi
+
+set -e
+
+AMEND_DATE=$(date --date="$1")
+
+GIT_COMMITTER_DATE="$AMEND_DATE" git commit --amend --no-edit --date "$AMEND_DATE"
