@@ -54,7 +54,7 @@ function safe_execute()
 {
     local cmd=$1
     local success=$2
-    local failure=$3
+    local failure=${3:-$success}
     local e_function=${4:-e_success}
     local output status
 
