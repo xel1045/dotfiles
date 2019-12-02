@@ -1,13 +1,13 @@
 #!/bin/bash
 
 echo "Downloading remote database"
-ssh adeschambeault@maxwell.exolnet.com "mysqldump --login-path=exolnet_panel exolnet_panel | gzip -3 -c" > ~/Desktop/cp_dump.sql.gz 2>/dev/null
+ssh maxwell.exolnet.com "sudo mysqldump exolnet_panel | gzip -3 -c" > ~/Desktop/cp_dump.sql.gz 2>/dev/null
 
 echo "Reseting de database"
 mysql --login-path=local -e "DROP DATABASE exolnet_panel_production"
 mysql --login-path=local -e "CREATE DATABASE exolnet_panel_production"
 
-echo "Importing the data"
+#echo "Importing the data"
 gunzip < ~/Desktop/cp_dump.sql.gz | mysql --login-path=local exolnet_panel_production
 
 rm -f ~/Desktop/cp_dump.sql.gz
