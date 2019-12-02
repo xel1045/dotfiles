@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# WIFI
+IP=$(/usr/sbin/ipconfig getifaddr en0)
+
+if [[ "$IP" =~ ^10\.0\.[0-9]+\.[0-9]+$ ]]; then
+    exit 0
+fi
+
+# Ethernet
+IP=$(/usr/sbin/ipconfig getifaddr en1)
+
+if [[ "$IP" =~ ^10\.0\.[0-9]+\.[0-9]+$ ]]; then
+    exit 0
+fi
+
+# VPN
+if /usr/sbin/scutil --nc list | grep eXolnet | grep --quiet Connected; then
+    exit 0
+fi
+
+exit 1
