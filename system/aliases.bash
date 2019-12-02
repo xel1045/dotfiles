@@ -105,3 +105,11 @@ alias chromium="/Applications/Chromium.app/Contents/MacOS/Chromium"
 alias sphp="exo-php-switch"
 alias interrupt="ae timelog:interrupt"
 alias exolnet-deploy-password="cp-cli credential:list --name='Redmine + Git' --username='exolnet' --safe | jq -r '.[0].password' | trimnl | pbcopy"
+
+# exolnet-scripts
+alias exo="exolnet-scripts"
+alias site="exo-scripts site"
+alias site-deploy="exo-scripts site deploy"
+alias site-setup="exo-scripts site setup"
+alias site-test="exo-scripts site test"
+alias site-up="exo-scripts site up"
