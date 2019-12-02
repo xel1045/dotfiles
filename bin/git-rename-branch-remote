@@ -1,0 +1,25 @@
+#!/bin/bash
+
+set -eu
+
+if [ $# -ne 2 ]; then
+	echo "Usage: git-rename-branch-remote <old-branch> <new-branch>"
+	exit 1
+fi
+
+OLD_BRANCH="$1"
+NEW_BRANCH="$2"
+
+if ! git has-branch "heads/$OLD_BRANCH" 2>/dev/null; then
+	CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+	git checkout "$OLD_BRANCH"
+
+	git rename-branch "$NEW_BRANCH"
+
+	git checkout "$CURRENT_BRANCH"
+
+	git branch -D "$NEW_BRANCH"
+else
+	git rename-branch "$NEW_BRANCH" "$OLD_BRANCH"
+fi
