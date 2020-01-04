@@ -38,6 +38,12 @@ for file in $DOTFILES/**/*.bash; do
 done
 
 # load bash completions
-#for file in $DOTFILES/**/*.bash-completion; do
-#  source $file
-#done
+for file in $DOTFILES/**/*.bash-completion; do
+  source $file
+done
+
+# load functions
+for file in $DOTFILES/functions/*; do
+  source $file
+done
+
