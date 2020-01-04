@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Dotfiles directory
+DOTFILES="$HOME/.dotfiles"
+
+echo "Cloning dotfiles to $DOTFILES ..."
+echo
+
+# Clone dotfiles
+git clone https://github.com/xel1045/dotfiles.git $DOTFILES
+cd $DOTFILES
+
+echo
+echo "Installing dotfiles ..."
+
+# Install dotfiles
+./install
