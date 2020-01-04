@@ -1,3 +1,10 @@
+#
+# Bash settings
+#
+
+# If not running interactively, don't do anything
+[ -z "$PS1" ] && return
+
 # shortcut to this dotfiles path is $ZSH
 export DOTFILES=$HOME/.dotfiles
 
