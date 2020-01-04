@@ -47,3 +47,7 @@ for file in $DOTFILES/functions/*; do
   source $file
 done
 
+# Initialize rbenv
+if [ -x "$(command -v rbenv)" ]; then
+  eval "$(rbenv init -)"
+fi
