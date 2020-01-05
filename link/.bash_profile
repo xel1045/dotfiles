@@ -43,7 +43,7 @@ for file in $DOTFILES/**/*.bash-completion; do
 done
 
 # load functions
-for file in $DOTFILES/functions/*; do
+for file in $DOTFILES/bash/functions/*; do
   source $file
 done
 
