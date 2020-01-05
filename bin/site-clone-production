@@ -3,7 +3,7 @@
 set -e
 
 # Source helpers
-. $DOTFILES/lib/utils
+. $DOTFILES/bash/lib/utils
 
 if [ ! -f config/deploy.php ]; then
     e_error "config/deploy.php file does not exists."

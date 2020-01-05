@@ -5,7 +5,7 @@ cd ~/repositories/exolnet-ansible
 set -e
 
 # Source helpers
-. $DOTFILES/lib/utils
+. $DOTFILES/bash/lib/utils
 
 LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
 
