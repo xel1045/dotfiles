@@ -25,6 +25,8 @@
     status = auto
     branch = auto
     ui = true
+[commit]
+	template = ~/.stCommitMsg
 [interactive]
     singleKey = yes
 [include]
@@ -40,3 +42,13 @@
     tree = log --oneline --graph --decorate
     tree-all = log --oneline --graph --decorate --all
     contains = branch -r --contains
+[difftool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/araxiscompare-w.sh -2 \"$LOCAL\" \"$REMOTE\"
+	path = 
+[difftool "araxis"]
+    path = /Applications/Araxis Merge.app/Contents/Utilities/compare
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/araxisgitmerge-w.sh \"$REMOTE\" \"$BASE\" \"$LOCAL\" \"$MERGED\"
+	trustExitCode = true
+[mergetool "araxis"]
+	path = /Applications/Araxis Merge.app/Contents/Utilities/compare
