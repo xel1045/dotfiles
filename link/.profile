@@ -35,12 +35,12 @@ export PATH="$HOME/Documents/Development/bin:$PATH"
 export MANPATH="/usr/local/man:/usr/local/mysql/man:/usr/local/git/man:$MANPATH"
 
 # load everything
-for file in $DOTFILES/shell/**/*.{sh,$SHELL_NAME}; do
+for file in $DOTFILES/shell/*.{sh,$SHELL_NAME}; do
   source $file
 done
 
 # load bash completions
-for file in $DOTFILES/shell/**/*.$SHELL_NAME-completion; do
+for file in $DOTFILES/shell/*.$SHELL_NAME-completion; do
   source $file
 done
 
