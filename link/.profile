@@ -30,7 +30,7 @@ export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 export PATH="$HOME/.composer/vendor/bin:$PATH"
 export PATH="$DOTFILES/bin:$PATH"
-export PATH="$HOME/Development/bin:$PATH"
+export PATH="$HOME/Documents/Development/bin:$PATH"
 
 export MANPATH="/usr/local/man:/usr/local/mysql/man:/usr/local/git/man:$MANPATH"
 
