@@ -1,3 +1,3 @@
-if [[ -a ~/.bash_profile ]]; then
-  source ~/.bash_profile
+if [[ -a ~/.profile ]]; then
+  source ~/.profile
 fi

@@ -15,3 +15,8 @@ rbenv() {
     command rbenv "$command" "$@";;
   esac
 }
+
+# Initialize rbenv
+if [ -x "$(command -v rbenv)" ]; then
+  eval "$(rbenv init -)"
+fi
