@@ -1,15 +1,8 @@
-#
-# Bash settings
-#
-
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
-
 # shortcut to this dotfiles path is $ZSH
 export DOTFILES=$HOME/.dotfiles
 
 # your project folder that we can `c [tab]` to
-export PROJECTS=~/Sites
+export PROJECTS=~/repositories
 
 # use .localrc for SUPER SECRET CRAP that you don't
 # want in your public, versioned repo.
