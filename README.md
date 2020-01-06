@@ -5,11 +5,6 @@ Dotfiles
 
 My macOS dotfiles.
 
-Requirements
-============
-
-* Requires GNU Coreutils installed (for GNU `ln`)
-
 Installation
 ============
 

@@ -70,7 +70,7 @@ function link_file()
     fi
 
     e_success "Linking $src -> $dest"
-    ln -rsfn "$src" "$dest"
+    ln -sfn "$src" "$dest"
 }
 
 function copy_file()
