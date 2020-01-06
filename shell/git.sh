@@ -24,19 +24,6 @@ alias bfg='java -jar "$DOTFILES/bin/bfg.jar"'
 
 alias nah="git reset --hard; git clean -df;"
 
-alias t="phpunit"
-alias tf="phpunit --filter "
-
-alias vm='ssh vagrant@127.0.0.1 -p 2222'
-alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
-alias publicip='dig +short myip.opendns.com @resolver1.opendns.com'
-alias chrome="/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome"
-
-alias ..="cd ../"
-alias ...="cd ../../"
-alias ....="cd ../../../"
-alias .....="cd ../../../../"
-
 function openpr() {
   br=`git branch | grep "*"`
   repo=$1
