@@ -18,11 +18,8 @@ alias gb='git branch'
 alias gs='git status -sb' # upgrade your git if -sb breaks for you. it's fun.
 alias grm="git status | grep deleted | awk '{\$1=\$2=\"\"; print \$0}' | \
            perl -pe 's/^[ \t]*//' | sed 's/ /\\\\ /g' | xargs git rm"
-alias wip="git add . && git commit -m 'wip'"
-
-alias bfg='java -jar "$DOTFILES/bin/bfg.jar"'
-
 alias nah="git reset --hard; git clean -df;"
+alias wip="git add . && git commit -m 'wip'"
 
 function openpr() {
   br=`git branch | grep "*"`
