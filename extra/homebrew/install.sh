@@ -6,13 +6,30 @@
 # using Homebrew.
 
 # Check for Homebrew
-if test ! $(which brew)
-then
+if test ! $(which brew); then
   echo "  Installing Homebrew for you."
   ruby -e "$(curl -fsSL https://raw.github.com/mxcl/homebrew/go)" > /tmp/homebrew-install.log
 fi
 
+# Install homebrew casks
+brew cask install \
+  adoptopenjdk
+
 # Install homebrew packages
-brew install grc coreutils spark
+brew install \
+  aws-shell \
+  bfg \
+  carthage \
+  coreutils \
+  dive \
+  exiftool \
+  figlet \
+  git \
+  git-extras \
+  hub \
+  ncdu \
+  spark \
+  thefuck \
+  tldr
 
 exit 0
