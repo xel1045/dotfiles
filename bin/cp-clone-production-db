@@ -3,7 +3,7 @@
 echo "Downloading remote database"
 ssh maxwell.exolnet.com "sudo mysqldump exolnet_panel | gzip -3 -c" > ~/Desktop/cp_dump.sql.gz 2>/dev/null
 
-echo "Reseting de database"
+echo "Reseting the database"
 mysql --login-path=local -e "DROP DATABASE exolnet_panel_production"
 mysql --login-path=local -e "CREATE DATABASE exolnet_panel_production"
 
