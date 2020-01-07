@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+	echo "Usage: icloud-app-sync <app> <files...>"
+	exit 1
+fi
+
+# Source helpers
+. $DOTFILES/shell/lib/utils
+
+APP_FOLDER=$HOME/Documents/Apps/$1
+shift 1
+
+echo $APP_FOLDER
+
+if [ ! -d "$APP_FOLDER" ]; then
+	mkdir $APP_FOLDER
+
+	e_success "Create application folder $APP_FOLDER"
+fi
+
+for FILE in $@; do
+	if [ ! -f "$FILE" ]; then
+		e_error "File $FILE does not exists"
+		exit 1
+	fi
+
+	if [ -f "$APP_FOLDER/$FILE" ]; then
+		e_error "File $FILE already exists in application folder"
+		exit 1
+	fi
+
+	mv "$FILE" "$APP_FOLDER"
+	ln -sfn "$APP_FOLDER/$FILE" "$FILE"
+
+	e_success "Linking $APP_FOLDER/$FILE -> $FILE"
+done
