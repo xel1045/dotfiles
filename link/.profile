@@ -38,13 +38,3 @@ export MANPATH="/usr/local/man:/usr/local/mysql/man:/usr/local/git/man:$MANPATH"
 for file in $DOTFILES/shell/*.{sh,$SHELL_NAME}; do
   source $file
 done
-
-# load bash completions
-for file in $DOTFILES/shell/*.$SHELL_NAME-completion; do
-  source $file
-done
-
-# load functions
-for file in $DOTFILES/shell/functions/*; do
-  source $file
-done
