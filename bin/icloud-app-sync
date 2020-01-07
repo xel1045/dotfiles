@@ -11,8 +11,6 @@ fi
 APP_FOLDER=$HOME/Documents/Apps/$1
 shift 1
 
-echo $APP_FOLDER
-
 if [ ! -d "$APP_FOLDER" ]; then
 	mkdir $APP_FOLDER
 
