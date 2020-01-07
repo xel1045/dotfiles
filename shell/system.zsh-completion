@@ -1,7 +1,0 @@
-[ -f /usr/local/etc/zsh_completion ] && . /usr/local/etc/zsh_completion
-[ -f /usr/local/bin/aws_zsh_completer ] && . /usr/local/bin/aws_zsh_completer
-
-# Homebrew autocompletions
-if type brew &>/dev/null; then
-  FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
-fi
