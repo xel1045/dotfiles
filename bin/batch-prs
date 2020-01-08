@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Source helpers
-. $DOTFILES/bash/lib/utils
+. $DOTFILES/shell/lib/utils
 
 function show_help() {
     echo "Usage: batch-prs -b <base> -h <head> -m <message> -s <script> [<folder> ...]"

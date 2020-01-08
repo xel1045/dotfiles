@@ -10,7 +10,7 @@ fi
 set -e
 
 # Source helpers
-. $DOTFILES/bash/lib/utils
+. $DOTFILES/shell/lib/utils
 
 PROJECT_NAME=$1
 PROJECT_FOLDER="$(pwd)/$PROJECT_NAME"

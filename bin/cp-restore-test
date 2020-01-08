@@ -14,7 +14,7 @@ if [ -d "$RESTORE_FOLDER" ]; then
 fi
 
 # Source helpers
-. $DOTFILES/bash/lib/utils
+. $DOTFILES/shell/lib/utils
 
 # Create the restore
 mkdir -p $RESTORE_FOLDER
