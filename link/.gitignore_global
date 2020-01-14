@@ -19,3 +19,15 @@ Thumbs.db
 
 # Editor files
 .idea/
+
+# PHP
+.php_cs.cache
+
+# Microsoft Office
+*.tmp
+~$*.doc*
+Backup of *.doc*
+~$*.xls*
+*.xlk
+~$*.ppt*
+*.~vsd*
