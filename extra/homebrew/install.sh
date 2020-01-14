@@ -17,6 +17,7 @@ brew cask install \
 
 # Install homebrew packages
 brew install \
+  adr-tools \
   aws-shell \
   bfg \
   carthage \
@@ -28,6 +29,7 @@ brew install \
   git-extras \
   hub \
   ncdu \
+  php-cs-fixer \
   spark \
   thefuck \
   tldr
