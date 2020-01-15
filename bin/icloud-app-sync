@@ -18,13 +18,13 @@ if [ ! -d "$APP_FOLDER" ]; then
 fi
 
 for FILE in $@; do
-	if [ ! -f "$FILE" ]; then
-		e_error "File $FILE does not exists"
+	if [ ! -e "$FILE" ]; then
+		e_error "File or directory '$FILE' does not exists"
 		exit 1
 	fi
 
-	if [ -f "$APP_FOLDER/$FILE" ]; then
-		e_error "File $FILE already exists in application folder"
+	if [ -e "$APP_FOLDER/$FILE" ]; then
+		e_error "File or folder '$FILE' already exists in application folder"
 		exit 1
 	fi
 
