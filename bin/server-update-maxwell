@@ -9,8 +9,10 @@ set -e
 
 LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
 
+e_arrow "Update maxwell.exolnet.com"
 ansible-playbook site-update.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
 
+e_arrow "Attach log output to Redmine issue #17609"
 redmine-attachment-add 17609 "$LOG_OUTPUT"
 
 if ask_yes_no "Remove local log file?"; then
