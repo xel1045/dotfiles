@@ -3,7 +3,7 @@
 # Archive a website to the "Ω Archives" folder
 
 if [ $# -lt 1 ]; then
-	echo "Usage: site-archive <folder> [<database>]"
+	echo "Usage: site-archive [<folder> ...] -- [<database> ...]"
 	exit 1
 fi
 
@@ -12,18 +12,32 @@ set -e
 # Source helpers
 . $DOTFILES/shell/lib/utils
 
-PROJECT_NAME=$1
-PROJECT_FOLDER="$(pwd)/$PROJECT_NAME"
-ARCHIVE_FOLDER="$(date +%Y%m%d)-$PROJECT_NAME"
+declare -a ARCHIVE_PROJECTS
+declare -a ARCHIVE_DATABASES
+
+ARGUMENT_PROJECT=true
+
+for ARGUMENT in $@; do
+	if [ "$ARGUMENT" = "--" ]; then
+		ARGUMENT_PROJECT=false
+	elif [ "$ARGUMENT_PROJECT" = true ]; then
+		ARCHIVE_PROJECTS+=($ARGUMENT)
+	else
+		ARCHIVE_DATABASES+=($ARGUMENT)
+	fi
+done
+
+if [ "${#ARCHIVE_PROJECTS[@]}" -eq 0 ]; then
+	echo "No archive project provided."
+	exit 3
+fi
+
+ARCHIVE_NAME=$1
+ARCHIVE_FOLDER="$(date +%Y%m%d)-$ARCHIVE_NAME"
 ARCHIVE_DESTINATION="$(pwd)/Ω Archives"
-ARCHIVE_FINAL="$ARCHIVE_DESTINATION/$PROJECT_NAME.tar.gz"
+ARCHIVE_FINAL="$ARCHIVE_DESTINATION/$ARCHIVE_NAME.tar.gz"
 
 WORKING_DIRECTORY=$(pwd)
-
-if [ ! -d "$PROJECT_FOLDER" ]; then
-	echo "Folder $PROJECT_NAME/ does not exists"
-	exit 2
-fi
 
 if [ -f "$ARCHIVE_FINAL" ]; then
 	echo "Archive $ARCHIVE_FINAL already exists."
@@ -35,49 +49,66 @@ if [ -d "$ARCHIVE_FOLDER" ]; then
 	exit 4
 fi
 
-DATABASE_DETECTED=$(cd $PROJECT_FOLDER; site-db-detect || echo "")
+if [ "${#ARCHIVE_DATABASES[@]}" -eq 0 ]; then
+	DATABASE_DETECTED=$(cd $PROJECT_FOLDER; site-db-detect || echo "")
 
-if [ $# -gt 1 ]; then
-	DATABASE_NAME="$2"
-elif [[ "$DATABASE_DETECTED" != "" ]] && ask_yes_no "Backup database $DATABASE_DETECTED"; then
-	DATABASE_NAME="$DATABASE_DETECTED"
-elif ! ask_yes_no "Backup without any database"; then
-	echo "Abort archive."
-	exit 5
+	if [[ "$DATABASE_DETECTED" != "" ]] && ask_yes_no "Backup database $DATABASE_DETECTED"; then
+		ARCHIVE_DATABASES+=($DATABASE_DETECTED)
+	fi
 fi
 
-#echo -e "\033[97;44m[1/6] Create the archive folder\033[0m"
+e_header "Set up"
+
+e_arrow "Create archive folder $(basename "$ARCHIVE_FOLDER")"
 
 mkdir "$ARCHIVE_FOLDER"
 
-echo -e "\033[97;44m[2/6] Archive the database\033[0m"
+e_header "Databases"
 
-if [ "$DATABASE_NAME" != "" ]; then
-	mkdir "$ARCHIVE_FOLDER/databases"
-	mysqldump --login-path=local "$DATABASE_NAME" > "$ARCHIVE_FOLDER/databases/$DATABASE_NAME.sql"
-	mysql --login-path=local  -e "DROP DATABASE IF EXISTS \`$DATABASE_NAME\`"
-else
-	echo ">> No databases to archive."
+if [ "${#ARCHIVE_DATABASES[@]}" -gt 0 ]; then
+	mkdir -p "$ARCHIVE_FOLDER/databases"
+
+	for DATABASE_NAME in "${ARCHIVE_DATABASES[@]}"; do
+		e_arrow $DATABASE_NAME
+
+		mysqldump --login-path=local "$DATABASE_NAME" > "$ARCHIVE_FOLDER/databases/$DATABASE_NAME.sql"
+		mysql --login-path=local  -e "DROP DATABASE IF EXISTS \`$DATABASE_NAME\`"
+	done
+elif ! ask_yes_no "Backup without any database"; then
+	e_error "Abort archive."
+	trash "$ARCHIVE_FOLDER"
+	exit 5
 fi
 
-echo -e "\033[97;44m[3/6] Archive project files\033[0m"
+e_header "Files"
 
-mv "$PROJECT_FOLDER" "$ARCHIVE_FOLDER/www"
+for PROJECT_NAME in "${ARCHIVE_PROJECTS[@]}"; do
+	e_arrow $PROJECT_NAME
 
-if [ -L ~"/Sites/$PROJECT_NAME" ]; then
-	echo -e "\033[97;44m[4/6] Remove symbolic link\033[0m"
+	mkdir -p "$ARCHIVE_FOLDER/www"
+	mv "$(pwd)/$PROJECT_NAME" "$ARCHIVE_FOLDER/www"
 
-	rm -f ~"/Sites/$PROJECT_NAME"
-	touch "$ARCHIVE_FOLDER/site-symlink"
+	if [ -L ~"/Sites/$PROJECT_NAME" ]; then
+		echo -e "\033[97;44m[4/6] Remove symbolic link\033[0m"
+
+		rm -f ~"/Sites/$PROJECT_NAME"
+		touch "$ARCHIVE_FOLDER/site-symlink"
+	fi
+done
+
+e_header "Tear down"
+
+e_arrow "Create final archive"
+
+if ! ask_yes_no "Continue?"; then
+	exit 1	
 fi
-
-echo -e "\033[97;44m[5/6] Compress archive\033[0m"
 
 mkdir -p "$ARCHIVE_DESTINATION"
 cd "$ARCHIVE_FOLDER"
 tar cvzf "$ARCHIVE_FINAL" *
 cd "$WORKING_DIRECTORY"
 
-echo -e "\033[97;44m[6/6] Clean up archive folder\033[0m"
+e_arrow "Cleanup archive folder"
 
-rm -rf "$ARCHIVE_FOLDER"
+trash "$ARCHIVE_FOLDER"

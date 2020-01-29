@@ -55,8 +55,8 @@ fi
 
 echo -e "\033[97;44mClean up restore folder\033[0m"
 
-rm -rf "$RESTORE_FOLDER"
+trash "$RESTORE_FOLDER"
 
 if ask_yes_no "Remove archive file?"; then
-	rm -f "$ARCHIVE_FINAL"
+	trash "$ARCHIVE_FINAL"
 fi
