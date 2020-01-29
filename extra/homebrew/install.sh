@@ -27,6 +27,7 @@ brew install \
   figlet \
   git \
   git-extras \
+  git-flow \
   hub \
   ncdu \
   php-cs-fixer \
