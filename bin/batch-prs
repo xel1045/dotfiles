@@ -5,6 +5,8 @@
 
 function show_help() {
     echo "Usage: batch-prs -b <base> -h <head> -m <message> -s <script> [<folder> ...]"
+    echo ""
+    echo 'Example: batch-prs -h feature/php-7.4 -m "Add PHP 7.4 to tested configurations in Travis" -s "vim -p composer.json .travis.yml" *'
     exit 1
 }
 
@@ -60,6 +62,10 @@ for PATH_DIRECTORY in $@; do
     # 3. Head branch does not exists
     if git-has-branch "remotes/origin/$BRANCH_HEAD"; then
         e_error "Head branch $BRANCH_HEAD already exists on origin. Continue"
+        continue
+    fi
+
+    if ! ask_yes_no "Continue?"; then
         continue
     fi
 
