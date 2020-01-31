@@ -16,12 +16,16 @@ Thumbs.db
 # Temporary files
 *~
 *.swp
+.*.sw[a-p]
 
 # Editor files
 .idea/
+.vscode/
 
 # PHP
 .php_cs.cache
+composer.phar
+wp-cli.phar
 
 # Microsoft Office
 *.tmp
@@ -31,3 +35,7 @@ Backup of *.doc*
 *.xlk
 ~$*.ppt*
 *.~vsd*
+
+# Other
+.vagrant/
+
