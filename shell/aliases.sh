@@ -161,8 +161,4 @@ alias exolnet-deploy-password="cp-cli credential:list --name='Redmine + Git' --u
 # exolnet-scripts
 alias exo="exolnet-scripts"
 alias site="exo-scripts site"
-alias site-deploy="exo-scripts site deploy"
-alias site-setup="exo-scripts site setup"
-alias site-test="exo-scripts site test"
-alias site-up="exo-scripts site up"
 alias redmine="exo-scripts redmine"
