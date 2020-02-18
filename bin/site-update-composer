@@ -22,7 +22,7 @@ test -f vendor/bin/phpunit
 test -f phpunit.xml
 
 echo -e "\033[97;44m[2/5] Update the repository to the latest change on $BRANCH\033[0m"
-site-up
+exo-scripts site up
 
 echo -e "\033[97;44m[3/5] Verify that the tests are currently passing\033[0m"
 vendor/bin/phpunit
