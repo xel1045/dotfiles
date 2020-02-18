@@ -13,7 +13,8 @@ fi
 
 # Install homebrew casks
 brew cask install \
-  adoptopenjdk
+  adoptopenjdk \
+  keycastr
 
 # Install homebrew packages
 brew install \
