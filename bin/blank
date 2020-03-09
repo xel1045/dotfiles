@@ -1,0 +1,10 @@
+#!/bin/bash
+
+LINES=$(tput lines)
+LINES=$(($LINES -1))
+
+for i in $(seq 1 $LINES); do
+   echo
+done
+
+clear
