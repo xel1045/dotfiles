@@ -4,4 +4,3 @@ MAILTO=xel1045@gmail.com
 
 # m h  dom mon dow(0=sunday)   command
 0 * * * * ~/.dotfiles/bin/projects-rotator.php > /dev/null 2>&1
-*/5 * * * * ~/.dotfiles/bin/dropbox-desktop-update.sh > /dev/null 2>&1
