@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Compare all DNS records for a domain accross two nameservers.
+
+if [ $# -lt 2 ]; then
+    echo "Usage: diff-dns <domain> <ns1> [<ns2>]"
+    exit 1
+fi
+
+DOMAIN=$1
+NS1="@$2"
+NS2=$3
+
+if [ "$NS2" != "" ]; then
+    NS2="@$NS2"
+fi
+
+diff <(sort -u <(dig +nocmd +noall +answer +nottlid $NS1 $DOMAIN ANY)) <(sort -u <(dig +nocmd +noall +answer +nottlid $NS2 $DOMAIN ANY))
