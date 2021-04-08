@@ -104,6 +104,11 @@ alias pubkey="more ~/.ssh/id_rsa.pub | pbcopy | echo '=> Public key copied to pa
 alias vm='ssh vagrant@127.0.0.1 -p 2222'
 
 # Docker
+alias dl="docker ps -l -q"
+alias dps="docker ps"
+alias di="docker images"
+alias dip="docker inspect --format '{{ .NetworkSettings.IPAddress }}'"
+alias dex="docker exec -i -t"
 alias ubuntu="docker run -it --rm -v `pwd`:/workspace phusion/baseimage bash"
 alias amazonlinux="docker run -it --rm -v `pwd`:/workspace amazonlinux bash"
 
@@ -113,6 +118,8 @@ alias chrome-canary="/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Goo
 alias chromium="/Applications/Chromium.app/Contents/MacOS/Chromium"
 
 # PHP
+alias p="phpunit"
+alias pf="phpunit --filter "
 alias php-profile="php -d xdebug.profiler_enable=on"
 alias fastest-run='find app/tests tests -name "*Test.php" | vendor/bin/fastest "`which php` vendor/bin/phpunit {}" -vvv'
 
@@ -150,6 +157,10 @@ alias sd='script/destroy'
 
 alias migrate='rake db:migrate db:test:clone'
 
+# Editors
+alias phpstorm='open -a /Applications/PhpStorm.app "`pwd`"'
+alias code='open -a "/Applications/Visual Studio Code.app" "`pwd`"'
+
 # Xcode
 alias ios="open /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone\ Simulator.app"
 
@@ -159,6 +170,6 @@ alias interrupt="ae timelog:interrupt"
 alias exolnet-deploy-password="cp-cli credential:list --name='Redmine + Git' --username='exolnet' --safe | jq -r '.[0].password' | trimnl | pbcopy"
 
 # exolnet-scripts
-alias exo="exolnet-scripts"
+alias exo="exo-scripts"
 alias site="exo-scripts site"
 alias redmine="exo-scripts redmine"
