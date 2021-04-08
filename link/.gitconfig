@@ -37,6 +37,7 @@
     st = status
     br = branch
     ff = merge --ff-only
+	forget="! /usr/local/bin/git fetch -p && /usr/local/bin/git branch -vv | awk '/: gone]/{print $1}' | xargs /usr/local/bin/git branch -D"
     pr = merge --no-ff
     force-push = push --force-with-lease
     tree = log --oneline --graph --decorate
