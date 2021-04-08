@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eu
+
+git fetch
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# $BRANCH -> master
+git checkout master
+git reset origin/master --hard
+git merge "$BRANCH" --no-ff
+
+# master -> $BRANCH
+git checkout "$BRANCH"
+git rebase master
+
+# master -> develop
+git checkout develop
+git reset origin/develop --hard
+git merge master --no-ff
+
+# checkout $BRANCH
+git checkout "$BRANCH"
