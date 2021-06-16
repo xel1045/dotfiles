@@ -123,3 +123,14 @@ bindkey -s "^[Om" "-"
 bindkey -s "^[Oj" "*"
 bindkey -s "^[Oo" "/"
 bindkey -s "^[OX" "="
+
+# Customize the prompt
+function awsume_prompt_info() {
+    if [ -z "$AWSUME_PROFILE" ]; then
+        return
+    fi
+
+    echo "%{$fg_bold[blue]%}aws:(%{$fg[red]%}$AWSUME_PROFILE@$AWS_REGION%{$fg[blue]%})%{$reset_color%} "
+}
+
+PROMPT+='$(awsume_prompt_info)'
