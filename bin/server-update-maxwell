@@ -9,9 +9,6 @@ set -e
 
 LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
 
-e_arrow "Schedule downtime"
-exo nagios schedule-host-downtime -d 60 maxwell.exolnet.com "Weekly updates"
-
 e_arrow "Update maxwell.exolnet.com"
 ansible-playbook site-update.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
 
