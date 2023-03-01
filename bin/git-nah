@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# Stage all unstaged.
+
+git reset --hard
+git clean -df
