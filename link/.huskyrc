@@ -1,0 +1,7 @@
+# Insert /usr/local/bin just before /usr/bin, so that SourceTree can still add 
+# a path to its custom git executable
+if [ -f /usr/local/bin/brew ]; then
+    brew_bin=$(/usr/local/bin/brew --prefix)/bin
+    brew_bin=${brew_bin/\//\/} # Escape path
+    export PATH=${PATH/\/usr\/bin:/$brew_bin:\/usr\/bin:}
+fi
