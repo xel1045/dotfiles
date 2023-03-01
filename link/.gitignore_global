@@ -26,6 +26,7 @@ Thumbs.db
 .vscode/
 
 # PHP
+.php
 .php_cs.cache
 composer.phar
 wp-cli.phar
