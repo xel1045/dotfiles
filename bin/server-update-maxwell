@@ -18,7 +18,7 @@ if [ -z "$AWS_SESSION_TOKEN" ]; then
 fi
 
 e_arrow "Update maxwell.exolnet.com"
-ansible-playbook site-update-linux.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
+ansible-playbook play--linux:update.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
 
 e_arrow "Attach log output to Redmine issue #17609"
 redmine issue:attach 17609 "$LOG_OUTPUT"
