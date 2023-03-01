@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 
 $projects_path = '/Users/adeschambeault/Documents/Projets';
