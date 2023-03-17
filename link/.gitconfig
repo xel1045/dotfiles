@@ -3,7 +3,7 @@
 [pull]
     rebase = true
 [core]
-    excludesfile = ~/.gitignore_global
+    excludesfile = ~/.gitignore
     editor = vim
 [help]
     autocorrect = 1
