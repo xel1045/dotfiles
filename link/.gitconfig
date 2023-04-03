@@ -1,9 +1,17 @@
+[gpg]
+    format = ssh
+[gpg "ssh"]
+    program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
 [push]
     default = simple
 [pull]
     rebase = true
+[user]
+	name = "Alexandre D'Eschambeault"
+	email = adeschambeault@exolnet.com
+	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICMc/cVar4em66ZXNnE/AY0ZUCNmhsfL6dvQsqt2zMAW
 [core]
-    excludesfile = ~/.gitignore
+	excludesfile = /Users/adeschambeault/.gitignore
     editor = vim
 [help]
     autocorrect = 1
@@ -26,6 +34,7 @@
     branch = auto
     ui = true
 [commit]
+    gpgsign = true
 	template = ~/.stCommitMsg
 [interactive]
     singleKey = yes
