@@ -38,6 +38,8 @@
     protocol = https
 [include]
     path = .gitconfig.local
+[init]
+	defaultBranch = master
 [interactive]
     singleKey = yes
 [merge]
