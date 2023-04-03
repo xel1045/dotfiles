@@ -55,6 +55,6 @@
 [push]
     default = simple
 [user]
-	name = "Alexandre D'Eschambeault"
+	name = Alexandre D’Eschambeault
 	email = adeschambeault@exolnet.com
 	signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICMc/cVar4em66ZXNnE/AY0ZUCNmhsfL6dvQsqt2zMAW
