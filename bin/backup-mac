@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ $# -lt 1 ]; then
+    echo "Usage: backup-mac <DESTINATION>"
+    exit 1
+fi
+
+DESTINATION=${1%/}
+
+sudo rsync --archive --delete --verbose --stats \
+    --exclude="/.fseventsd/" \
+    --exclude="/.Spotlight-V100/" \
+    --exclude="/.Trashes/" \
+    --exclude="/dev/" \
+    --exclude="/home/" \
+    --exclude="/Library/Caches/" \
+    --exclude="/net/" \
+    --exclude="/Network/" \
+    --exclude="/private/tmp/" \
+    --exclude="/private/var/" \
+    --exclude="/private/var/vm/" \
+    --exclude="/System/Library/Caches/" \
+    --exclude="/System/Library/Templates/Data/private/var/db/oah/" \
+    --exclude="/System/Volumes/" \
+    --exclude="/tmp" \
+    --exclude="/Volumes/" \
+    --exclude="$HOME/.Trash/" \
+    --exclude="$HOME/Dropbox/" \
+    --exclude="$HOME/Library/Application Support/Google/DriveFS/" \
+    --exclude="$HOME/Library/Caches/" \
+    --exclude="$HOME/Library/CloudStorage/" \
+    --exclude="$HOME/Library/Containers/com.apple.mail/Data/DataVaults" \
+    --exclude="$HOME/Library/Containers/com.docker.docker/" \
+    --exclude="$HOME/Library/Containers/Docker/" \
+    --exclude="$HOME/Library/Developer/" \
+    --exclude="$HOME/VirtualBox VMs/" \
+    / \
+    "$DESTINATION/" \
+    2>&1 | tee -a "$DESTINATION.$(date +%Y-%m-%d).log"
