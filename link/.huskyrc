@@ -1,9 +1,9 @@
 # Insert /usr/local/bin just before /usr/bin, so that SourceTree can still add 
 # a path to its custom git executable
 if [ -f /opt/homebrew/bin/brew ]; then
-    brew_bin=$(/opt/homebrew/bin/brew --prefix)/bin
+    brew_bin=/opt/homebrew/bin
 elif [ -f /usr/local/bin/brew ]; then
-    brew_bin=$(/usr/local/bin/brew --prefix)/bin
+    brew_bin=/usr/local/bin
 fi
 
 if [ ! -z "$brew_bin" ]; then
