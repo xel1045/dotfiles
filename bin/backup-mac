@@ -25,6 +25,8 @@ sudo rsync --archive --delete --verbose --stats \
     --exclude="/tmp" \
     --exclude="/Volumes/" \
     --exclude="$HOME/.Trash/" \
+    --exclude="$HOME/Desktop/" \
+    --exclude="$HOME/Documents/" \
     --exclude="$HOME/Dropbox/" \
     --exclude="$HOME/Library/Application Support/Google/DriveFS/" \
     --exclude="$HOME/Library/Caches/" \
@@ -33,6 +35,8 @@ sudo rsync --archive --delete --verbose --stats \
     --exclude="$HOME/Library/Containers/com.docker.docker/" \
     --exclude="$HOME/Library/Containers/Docker/" \
     --exclude="$HOME/Library/Developer/" \
+    # --exclude="$HOME/Music/iTunes/" \
+    # --exclude="$HOME/Pictures/Photos Library.photoslibrary" \
     --exclude="$HOME/VirtualBox VMs/" \
     / \
     "$DESTINATION/" \
