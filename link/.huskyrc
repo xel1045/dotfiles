@@ -1,5 +1,4 @@
-# Insert /usr/local/bin just before /usr/bin, so that SourceTree can still add 
-# a path to its custom git executable
+# EXOLNET-MACOS-TOOLBOX BEGIN
 if [ -f /opt/homebrew/bin/brew ]; then
     brew_bin=/opt/homebrew/bin
 elif [ -f /usr/local/bin/brew ]; then
@@ -7,7 +6,9 @@ elif [ -f /usr/local/bin/brew ]; then
 fi
 
 if [ ! -z "$brew_bin" ]; then
-    brew_bin=${brew_bin/\//\/} # Escape path
+    brew_bin=${brew_bin/\//\/}
+    # Insert brew bin directory before /usr/bin to allow programs
+    # like SourceTree to add a path to its custom git executable
     export PATH=${PATH/\/usr\/bin:/$brew_bin:\/usr\/bin:}
 fi
-
+# EXOLNET-MACOS-TOOLBOX END
