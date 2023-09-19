@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ $# -ne 2 ]; then
+    echo "Usage: git-tag-rename <old-tag> <new-tag>"
+    exit 1
+fi
+
+set -e
+
+OLD_TAG=$1
+NEW_TAG=$2
+
+git tag $NEW_TAG $OLD_TAG
+git tag -d $OLD_TAG
+git push origin :refs/tags/$OLD_TAG
+git push origin $NEW_TAG
