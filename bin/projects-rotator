@@ -1,71 +1,44 @@
 #!/usr/bin/env php
 <?php
 
-$projects_path = '/Users/adeschambeault/Documents/Projets';
-$desktop_path  = '/Users/adeschambeault/Desktop';
-$archives_path = null; //'/Users/adeschambeault/Backups/Projets';
-$archive_after = 5;
+$projectsPath = $_SERVER['HOME'] . '/Documents/Projets';
+$desktopPath  = $_SERVER['HOME'] . '/Desktop';
 
 //==============================================================================
 
-$projects_path = realpath($projects_path).'/';
-$desktop_path  = realpath($desktop_path).'/';
-$archives_path = $archives_path ? realpath($archives_path).'/' : null;
+$projectsPath = realpath($projectsPath) . '/';
+$desktopPath  = realpath($desktopPath) . '/';
 
 
 set_time_limit(0);
 date_default_timezone_set('America/Montreal');
 setlocale(LC_ALL, 'fr_CA');
 
-$months_names = array('Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
-	'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre');
+$projectFormatter = new IntlDateFormatter('fr_CA', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'YYYY MMMM');
+$desktopFormatter = new IntlDateFormatter('fr_CA', IntlDateFormatter::NONE, IntlDateFormatter::NONE, null, null, 'MMMM YYYY');
 
+// 1. Create folder in the projects folder
+$projectName = ucwords($projectFormatter->format(time()));
 
-// Création du mois actuelle de sauvegarde de fichier si ce dernier n'a pas déjà
-// été crée.
-$actual = ucwords(strftime('%Y %B'));
-
-if ( ! file_exists($projects_path.$actual)) {
-	echo 'Creating project folder '.$actual.PHP_EOL;
-	mkdir($projects_path.$actual);
+if (! file_exists($projectsPath . $projectName)) {
+	echo 'Creating project folder  '. $projectName.PHP_EOL;
+	mkdir($projectsPath . $projectName);
 }
 
-$desktop_name = ucwords(strftime('%B %Y'));
-if (! file_exists($desktop_path.$desktop_name)) {
-	symlink($projects_path.$actual, $desktop_path.$desktop_name);
+// 2. Add a shortcut to the desktop
+$desktopName = ucwords($desktopFormatter->format(time()));
+if (! file_exists($desktopPath . $desktopName)) {
+	symlink($projectsPath . $projectName, $desktopPath . $desktopName);
 }
 
-// Archivage des vieux dossiers de sauvegarde par mois
-if ($archives_path && $dh = opendir($projects_path)) {
-	while (($file = readdir($dh)) !== false) {
-		// On s'assure qu'il s'agit d'un dossier au format 2XXX Mois
-		if (!preg_match('/^(2\d{3}) (.+)$/', $file, $matches)) {
-			continue;
-		}
+// 3. Archive old shortchuts on the desktop (up to 12 months)
+for ($i=1; $i<12; $i++) {
+	$archiveDate = new DateTime();
+	$archiveDate->sub(DateInterval::createFromDateString($i . ' month'));
 
-		$year = $matches[1];
-		$month_name = preg_replace('/[^A-Za-z]/', '', $matches[2]);
+	$archiveDesktopName = ucwords($desktopFormatter->format($archiveDate));
 
-		// Est-ce qu'on est en mesure d'identifier le mois?
-		if ( ! in_array($month_name, $months_names)) {
-			continue;
-		}
-
-		$month = array_search($month_name, $months_names)+1;
-
-		$time = mktime(0, 0, 0, $month, 1, $year);
-		$interval = floor((time() - $time) / 2629744);
-
-		if ($interval > $archive_after) {
-			shell_exec('mv "'.$projects_path.$file.'" "'.$archives_path.$file.'"');
-		}
-
-		$desktop_name = ucwords(strftime('%B %Y', $time));
-
-		if ($interval > 0 && file_exists($desktop_path.$desktop_name)) {
-			unlink($desktop_path.$desktop_name);
-		}
+	if (file_exists($desktopPath . $archiveDesktopName)) {
+		unlink($desktopPath . $archiveDesktopName);
 	}
-
-	closedir($dh);
 }
