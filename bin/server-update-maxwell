@@ -12,7 +12,9 @@ LOG_OUTPUT="$HOME/Desktop/$(date +%Y%m%d)-maxwell.exolnet.com-updates.log"
 e_arrow "Update exolnet-ansible"
 git up
 
-if [ -z "$AWS_SESSION_TOKEN" ]; then
+e_arrow "Assume AWS profile"
+
+if [ -z "$AWS_PROFILE" ] && [ -z "$AWS_SESSION_TOKEN" ]; then
 	e_error "No AWS profile is assumed" 2>&1
 	exit 1
 fi
