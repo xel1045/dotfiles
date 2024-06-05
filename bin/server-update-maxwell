@@ -17,6 +17,11 @@ if [ -z "$AWS_SESSION_TOKEN" ]; then
 	exit 1
 fi
 
+if [ -d .venv ]; then
+	e_arrow "Activate virtualenv"
+	source .venv/bin/activate
+fi
+
 e_arrow "Update maxwell.exolnet.com"
 ansible-playbook play--linux:update.yml --limit maxwell.exolnet.com -v --diff 2>&1 | tee "$LOG_OUTPUT"
 
