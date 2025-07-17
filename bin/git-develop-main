@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -eu
+
+git fetch
+
+# develop -> main
+git checkout main
+git reset origin/main --hard
+git merge develop --no-ff
+
+# main -> develop
+git checkout develop
+git rebase main

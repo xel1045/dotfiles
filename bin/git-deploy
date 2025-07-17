@@ -3,9 +3,9 @@
 # 1. Get the last version of history
 git fetch
 
-# 2. Ensure master and develop branches are clean, i.e., there's nothing to push
-if [[ $(git log origin/master..master 2> /dev/null) != "" ]]; then
-	echo "Error: Your master branch have unpushed commits"
+# 2. Ensure main and develop branches are clean, i.e., there's nothing to push
+if [[ $(git log origin/main..main 2> /dev/null) != "" ]]; then
+	echo "Error: Your main branch have unpushed commits"
 	exit 1
 fi
 
@@ -14,16 +14,16 @@ if [[ $(git log origin/develop..develop 2> /dev/null) != "" ]]; then
 	exit 1
 fi
 
-# 3. Pull master and develop branch to the last revision
+# 3. Pull main and develop branch to the last revision
 git checkout --quiet develop
 git pull --rebase --log --quiet origin develop
 
-git checkout --quiet master
-git pull --rebase --log --quiet origin master
+git checkout --quiet main
+git pull --rebase --log --quiet origin main
 
-# 4. Ensure the last commit on the develop branch is not in the master branch
-if [[ $(git log master..develop 2> /dev/null) == "" ]]; then
-	echo "Error: Nothing to deploy. The last commit on develop is already on master."
+# 4. Ensure the last commit on the develop branch is not in the main branch
+if [[ $(git log main..develop 2> /dev/null) == "" ]]; then
+	echo "Error: Nothing to deploy. The last commit on develop is already on main."
 	exit 1
 fi
 
@@ -37,14 +37,14 @@ if ! [[ $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 	exit 1
 fi
 
-# 6. Merge develop into master
+# 6. Merge develop into main
 git merge --no-edit --no-ff --log develop
 echo ""
 
-# 7. Tag the last commit in master
+# 7. Tag the last commit in main
 git tag -a -m "" "$VERSION"
 
-# 8. Ask the user to confirm the deployment, if no, revert the master branch
+# 8. Ask the user to confirm the deployment, if no, revert the main branch
 echo "New history:"
 git --no-pager log --tags --pretty=format:"%h %d %s" --graph -5
 echo ""
@@ -55,9 +55,9 @@ if ! [[ $YN =~ ^[Yy]$ ]]; then
 	echo "Rolling back..."
 
 	git tag -d "$VERSION" > /dev/null
-	git reset -q --hard origin/master
+	git reset -q --hard origin/main
 	exit
 fi
 
-# 9. Push the master branch
+# 9. Push the main branch
 git push --tags origin

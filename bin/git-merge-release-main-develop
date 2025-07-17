@@ -6,19 +6,19 @@ git fetch
 
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# $BRANCH -> master
-git checkout master
-git reset origin/master --hard
+# $BRANCH -> main
+git checkout main
+git reset origin/main --hard
 git merge "$BRANCH" --no-ff
 
-# master -> $BRANCH
+# main -> $BRANCH
 git checkout "$BRANCH"
-git rebase master
+git rebase main
 
-# master -> develop
+# main -> develop
 git checkout develop
 git reset origin/develop --hard
-git merge master --no-ff
+git merge main --no-ff
 
 # checkout $BRANCH
 git checkout "$BRANCH"
